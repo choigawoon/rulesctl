@@ -38,10 +38,6 @@ func init() {
 		fmt.Printf("설정 디렉토리를 생성할 수 없습니다: %v\n", err)
 		os.Exit(1)
 	}
-	
-	// 디버그 로그
-	fmt.Printf("설정 디렉토리: %s\n", configDir)
-	fmt.Printf("설정 파일: %s\n", configFile)
 }
 
 // GetConfigDir는 설정 디렉토리의 경로를 반환합니다
@@ -49,32 +45,42 @@ func GetConfigDir() (string, error) {
 	return configDir, nil
 }
 
+// getConfigPath는 설정 파일의 경로를 반환합니다
+func getConfigPath() (string, error) {
+	return configFile, nil
+}
+
 // EnsureConfigDir는 설정 디렉토리가 존재하는지 확인하고, 없으면 생성합니다
 func EnsureConfigDir() error {
 	return os.MkdirAll(configDir, 0700)
 }
 
-// LoadConfig는 설정 파일을 로드합니다
+// LoadConfig는 설정을 로드합니다
 func LoadConfig() (*Config, error) {
-	// 디버그 로그
-	fmt.Printf("설정 파일 로드 시도: %s\n", configFile)
-	
-	data, err := os.ReadFile(configFile)
+	// 1. 환경 변수에서 토큰 확인
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
+		return &Config{Token: token}, nil
+	}
+
+	// 2. 설정 파일에서 토큰 확인
+	configPath, err := getConfigPath()
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Printf("설정 파일이 없습니다. 새로 생성합니다.\n")
 			return &Config{}, nil
 		}
-		return nil, fmt.Errorf("설정 파일을 읽을 수 없습니다: %w", err)
+		return nil, err
 	}
 
 	var config Config
 	if err := json.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("설정 파일을 파싱할 수 없습니다: %w", err)
+		return nil, err
 	}
 
-	// 디버그 로그
-	fmt.Printf("설정 파일 로드 완료. 토큰 길이: %d\n", len(config.Token))
 	return &config, nil
 }
 

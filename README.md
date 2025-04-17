@@ -50,7 +50,8 @@ rulesctl init
 rulesctl init --sample  # Also create example rule files
 
 # View rule list (only shows those from the last month)
-rulesctl list
+rulesctl list                # Show basic information
+rulesctl list --detail      # Show detailed information including revision
 
 # Upload rules (private by default)
 rulesctl upload "RuleSetName"

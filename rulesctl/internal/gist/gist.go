@@ -13,7 +13,7 @@ var baseURL = "https://api.github.com"
 
 const MetaFileName = ".rulesctl.meta.json"
 
-// Gist는 GitHub Gist의 기본 정보를 나타냅니다
+// Gist는 GitHub Gist의 정보를 나타냅니다
 type Gist struct {
 	ID          string    `json:"id"`
 	Description string    `json:"description"`
@@ -27,6 +27,12 @@ type Gist struct {
 		Size     int    `json:"size"`
 		Content  string `json:"content"`
 	} `json:"files"`
+	Version     int       `json:"version"`
+	History     []struct {
+		Version   int       `json:"version"`
+		CommitID  string    `json:"commit_id"`
+		UpdatedAt time.Time `json:"updated_at"`
+	} `json:"history"`
 }
 
 // FetchUserGists는 사용자의 Gist를 가져옵니다
@@ -81,6 +87,41 @@ func FetchUserGists(since *time.Time) ([]Gist, error) {
 	}
 
 	return rulesctlGists, nil
+}
+
+// FetchGistWithHistory는 특정 Gist의 상세 정보와 히스토리를 가져옵니다
+func FetchGistWithHistory(token, gistID string) (*Gist, error) {
+	url := fmt.Sprintf("https://api.github.com/gists/%s", gistID)
+	
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
+	
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API 요청 실패: %s", resp.Status)
+	}
+	
+	var gist Gist
+	if err := json.NewDecoder(resp.Body).Decode(&gist); err != nil {
+		return nil, err
+	}
+
+	// History가 있으면 최신 버전 번호 설정
+	if len(gist.History) > 0 {
+		gist.Version = gist.History[0].Version
+	}
+	
+	return &gist, nil
 }
 
 // DeleteGist는 지정된 ID의 Gist를 삭제합니다.

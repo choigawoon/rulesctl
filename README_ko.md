@@ -50,7 +50,8 @@ rulesctl init
 rulesctl init --sample  # 예제 규칙 파일도 함께 생성
 
 # 규칙 목록 보기 (최근 1달 이내만 표시)
-rulesctl list
+rulesctl list                # 기본 정보만 표시
+rulesctl list --detail      # revision 정보 포함하여 상세 표시
 
 # 규칙 업로드하기 (기본적으로 비공개)
 rulesctl upload "규칙세트이름"
