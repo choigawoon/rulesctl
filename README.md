@@ -145,8 +145,8 @@ rulesctl supports the following platforms:
 
 ## Developer Guide
 
-For development and testing methods, refer to the [Getting Started Guide](docs/GET-STARTED.md).
+For development and testing methods, refer to the [Getting Started Guide](docs/en/GET-STARTED.md).
 
 ## Contributing
 
-For contribution guidelines, refer to the [Contribution Guide](docs/GET-STARTED.md#contributing). 
+For contribution guidelines, refer to the [Contribution Guide](docs/en/GET-STARTED.md#contributing). 

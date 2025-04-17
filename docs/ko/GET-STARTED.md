@@ -14,9 +14,6 @@ rulesctl/
 │   └── fileutils/
 ├── pkg/                    # 설정 등 외부 노출 가능 패키지
 │   └── config/
-├── docs/                   # 문서
-│   ├── rulesctl/
-│   └── npm/
 ├── go.mod
 └── main.go
 ```
