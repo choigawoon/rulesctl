@@ -23,6 +23,10 @@
       "rules",
       "gist"
     ],
+    "preferGlobal": true,
+    "engines": {
+      "node": ">=14"
+    },
     "license": "MIT"
   }
   

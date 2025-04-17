@@ -5,6 +5,7 @@ const { spawn } = require("child_process");
 const path = require("path");
 const https = require("https");
 const fs = require("fs");
+const { execSync } = require("child_process");
 
 const OWNER = "choigawoon";
 const REPO = "rulesctl";
@@ -17,12 +18,10 @@ async function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
     https.get(url, response => {
       console.log(`Response status: ${response.statusCode}`);
-      console.log(`Response headers:`, response.headers);
-
+      
       if (response.statusCode === 302) {
         console.log(`Following redirect to: ${response.headers.location}`);
         https.get(response.headers.location, redirectedResponse => {
-          console.log(`Redirect response status: ${redirectedResponse.statusCode}`);
           if (redirectedResponse.statusCode !== 200) {
             return reject(new Error(`Failed to download: ${redirectedResponse.statusCode}`));
           }
@@ -30,7 +29,6 @@ async function downloadFile(url, dest) {
           redirectedResponse.pipe(file);
           file.on("finish", () => {
             file.close();
-            fs.chmodSync(dest, "755");
             resolve();
           });
         }).on("error", error => {
@@ -42,7 +40,6 @@ async function downloadFile(url, dest) {
         response.pipe(file);
         file.on("finish", () => {
           file.close();
-          fs.chmodSync(dest, "755");
           resolve();
         });
       } else {
@@ -53,6 +50,47 @@ async function downloadFile(url, dest) {
       reject(error);
     });
   });
+}
+
+async function extractBinary(archivePath, targetDir, platform) {
+  console.log(`Extracting binary from ${archivePath} to ${targetDir}`);
+  
+  const isWindows = platform === "win32";
+  const binName = isWindows ? "rulesctl.exe" : "rulesctl";
+  const finalName = isWindows ? "rulesctl-win.exe" : `rulesctl-${platform}`;
+  
+  try {
+    // 임시 디렉토리 생성
+    const tempDir = path.join(os.tmpdir(), `rulesctl-${Date.now()}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+    
+    // 압축 해제
+    if (isWindows) {
+      // Windows: unzip 사용
+      execSync(`powershell -command "Expand-Archive -Path '${archivePath}' -DestinationPath '${tempDir}'"`, { stdio: 'inherit' });
+    } else {
+      // macOS/Linux: tar 사용
+      execSync(`tar -xzf "${archivePath}" -C "${tempDir}"`, { stdio: 'inherit' });
+    }
+    
+    // 바이너리 찾기
+    const extractedBinary = path.join(tempDir, binName);
+    const targetBinary = path.join(targetDir, finalName);
+    
+    // 바이너리 이동
+    fs.copyFileSync(extractedBinary, targetBinary);
+    fs.chmodSync(targetBinary, "755");
+    
+    // 임시 파일 정리
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    fs.rmSync(archivePath);
+    
+    console.log(`Binary extracted and installed at: ${targetBinary}`);
+    return targetBinary;
+  } catch (error) {
+    console.error("Failed to extract binary:", error);
+    throw error;
+  }
 }
 
 async function install() {
@@ -86,19 +124,19 @@ async function install() {
     fs.mkdirSync(binDir, { recursive: true });
   }
 
-  const binPath = path.join(binDir, platform === "win32" ? "rulesctl-win.exe" : `rulesctl-${platform}`);
+  const archivePath = path.join(os.tmpdir(), assetName);
 
-  console.log(`Downloading ${assetName}...`);
   try {
-    await downloadFile(downloadUrl, binPath);
+    // 다운로드
+    console.log(`Downloading ${assetName}...`);
+    await downloadFile(downloadUrl, archivePath);
+    
+    // 압축 해제 및 설치
+    await extractBinary(archivePath, binDir, platform);
+    
     console.log("rulesctl installed successfully!");
-    console.log(`Binary path: ${binPath}`);
-    // 파일 존재 여부와 권한 확인
-    const stats = fs.statSync(binPath);
-    console.log(`File exists: ${fs.existsSync(binPath)}`);
-    console.log(`File permissions: ${stats.mode.toString(8)}`);
   } catch (error) {
-    console.error("Failed to download rulesctl:", error);
+    console.error("Failed to install rulesctl:", error);
     process.exit(1);
   }
 }
@@ -119,7 +157,6 @@ if (process.argv[2] === "install") {
 
   const binPath = path.join(__dirname, "bin", bin);
   
-  // 실행 전 파일 존재 여부 확인
   if (!fs.existsSync(binPath)) {
     console.error(`Binary not found at: ${binPath}`);
     console.error("Please try reinstalling the package");
