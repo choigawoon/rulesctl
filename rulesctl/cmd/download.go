@@ -34,6 +34,7 @@ var downloadCmd = &cobra.Command{
 		}
 
 		if cfg.Token == "" {
+			cmd.SilenceUsage = true
 			return fmt.Errorf("GitHub 토큰이 설정되지 않았습니다. 'rulesctl auth' 명령어로 토큰을 설정해주세요")
 		}
 
@@ -45,6 +46,7 @@ var downloadCmd = &cobra.Command{
 		} else {
 			// 제목으로 다운로드
 			if len(args) == 0 {
+				cmd.SilenceUsage = true
 				return fmt.Errorf("제목 또는 --gistid 옵션을 지정해주세요")
 			}
 			title := args[0]
@@ -52,6 +54,7 @@ var downloadCmd = &cobra.Command{
 			// 전체 Gist 목록 조회
 			gists, err := gist.FetchUserGists(nil)
 			if err != nil {
+				cmd.SilenceUsage = true
 				return fmt.Errorf("Gist 목록 조회 실패: %w", err)
 			}
 
@@ -66,6 +69,7 @@ var downloadCmd = &cobra.Command{
 			}
 
 			if !found {
+				cmd.SilenceUsage = true
 				return fmt.Errorf("제목과 일치하는 Gist를 찾을 수 없습니다: %s", title)
 			}
 		}
@@ -73,18 +77,21 @@ var downloadCmd = &cobra.Command{
 		// Gist 가져오기
 		g, err := gist.FetchGist(cfg.Token, targetGistID)
 		if err != nil {
+			cmd.SilenceUsage = true
 			return fmt.Errorf("Gist를 가져올 수 없습니다: %w", err)
 		}
 
 		// .rulesctl.meta.json 파일 확인
 		metaFile, exists := g.Files[gist.MetaFileName]
 		if !exists {
+			cmd.SilenceUsage = true
 			return fmt.Errorf("이 Gist는 rulesctl로 관리되지 않습니다 (메타데이터 파일이 없음)")
 		}
 
 		// 메타데이터 파싱
 		meta, err := gist.ParseMetadataFromGist(metaFile.Content)
 		if err != nil {
+			cmd.SilenceUsage = true
 			return fmt.Errorf("메타데이터 파싱 실패: %w", err)
 		}
 
@@ -92,6 +99,7 @@ var downloadCmd = &cobra.Command{
 		if !force {
 			conflicts, err := gist.CheckConflicts(meta)
 			if err != nil {
+				cmd.SilenceUsage = true
 				return fmt.Errorf("충돌 검사 실패: %w", err)
 			}
 			if len(conflicts) > 0 {
@@ -99,6 +107,7 @@ var downloadCmd = &cobra.Command{
 				for _, path := range conflicts {
 					fmt.Printf("  - %s\n", path)
 				}
+				cmd.SilenceUsage = true
 				return fmt.Errorf("파일 충돌이 발생했습니다. --force 옵션을 사용하여 덮어쓸 수 있습니다")
 			}
 		}

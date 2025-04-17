@@ -7,6 +7,7 @@ import (
 
 	"github.com/choigawoon/rulesctl/internal/fileutils"
 	"github.com/choigawoon/rulesctl/internal/gist"
+	"github.com/choigawoon/rulesctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +25,24 @@ var uploadCmd = &cobra.Command{
 --preview 플래그를 사용하면 실제 업로드 없이 메타데이터를 미리 확인할 수 있습니다.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// 설정 로드
+		cfg, err := config.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("설정을 로드할 수 없습니다: %w", err)
+		}
+
+		if cfg.Token == "" {
+			cmd.SilenceUsage = true
+			return fmt.Errorf("GitHub 토큰이 설정되지 않았습니다. 'rulesctl auth' 명령어로 토큰을 설정해주세요")
+		}
+
+		if len(args) == 0 {
+			cmd.SilenceUsage = true
+			return fmt.Errorf("제목을 지정해주세요")
+		}
+
+		title := args[0]
+
 		// 0. 규칙 디렉토리 확인 및 생성
 		if err := fileutils.EnsureRulesDir(); err != nil {
 			return fmt.Errorf("규칙 디렉토리 생성 실패: %v", err)
@@ -54,11 +73,10 @@ var uploadCmd = &cobra.Command{
 
 		// 미리보기 모드인 경우 메타데이터만 출력하고 종료
 		if preview {
-			jsonData, err := meta.WriteMetadataPreview()
-			if err != nil {
-				return fmt.Errorf("메타데이터 JSON 생성 실패: %v", err)
+			fmt.Printf("업로드할 파일 목록 (총 %d개):\n", len(meta.Files))
+			for _, file := range meta.Files {
+				fmt.Printf("  - %s\n", file.Path)
 			}
-			fmt.Println(string(jsonData))
 			return nil
 		}
 
@@ -97,8 +115,7 @@ var uploadCmd = &cobra.Command{
 		}
 
 		// 5. Gist 생성 또는 업데이트
-		name := args[0]
-		gistID, err := client.CreateOrUpdateGist(name, files, forceUpload)
+		gistID, err := client.CreateOrUpdateGist(title, files, forceUpload)
 		if err != nil {
 			return fmt.Errorf("Gist 업로드 실패: %v", err)
 		}
