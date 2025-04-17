@@ -18,19 +18,26 @@ npm install -g rulesctl
 
 ### 인증 설정 (필수)
 
-rulesctl을 사용하기 전에 **반드시** GitHub 인증 설정을 해야 합니다:
+rulesctl을 사용하기 위해서는 GitHub 인증 설정이 **반드시** 필요합니다. 인증 설정은 다음 두 가지 방법으로 할 수 있습니다:
 
+1. 환경 변수 사용 (권장)
 ```bash
-rulesctl auth
+export GITHUB_TOKEN="your_github_token"
+# 환경 변수 사용 시 'rulesctl auth' 명령어 실행이 필요하지 않습니다
 ```
 
-명령어 실행 시 GitHub Personal Access Token을 입력하는 창이 나타납니다. 토큰은 사용자의 홈 디렉토리 `~/.rulesctl/config` 파일에 JSON 형식으로 저장됩니다.
+2. auth 명령어 사용
+```bash
+rulesctl auth  # 프롬프트에서 토큰 입력
+```
+
+auth 명령어를 사용할 경우 토큰은 홈 디렉토리의 `~/.rulesctl/config` 파일에 JSON 형식으로 저장됩니다.
 
 > **중요**: Personal Access Token에는 다음 권한이 필요합니다:
-> - Gist (read/write) 권한
-> - repo 권한 (https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules-new 에서 파일 목록 접근용)
+> - Gist (읽기/쓰기) 권한
+> - repo 권한 (https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules-new 의 파일 목록 접근용)
 
-토큰 생성 방법은 [GitHub 공식 문서](https://docs.github.com/ko/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)를 참고하세요.
+토큰 생성 방법은 [GitHub 공식 문서](https://docs.github.com/ko/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)를 참조하세요.
 
 ### 기본 명령어
 

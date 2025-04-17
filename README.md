@@ -18,13 +18,20 @@ npm install -g rulesctl
 
 ### Authentication Setup (Required)
 
-You **must** set up GitHub authentication before using rulesctl:
+You **must** set up GitHub authentication before using rulesctl. There are two ways to set up authentication:
 
+1. Using environment variable (recommended)
 ```bash
-rulesctl auth
+export GITHUB_TOKEN="your_github_token"
+# No need to run 'rulesctl auth' when using environment variable
 ```
 
-When you run the command, a prompt will appear for entering your GitHub Personal Access Token. The token is stored in JSON format in the `~/.rulesctl/config` file in your home directory.
+2. Using the auth command
+```bash
+rulesctl auth  # Enter token at prompt
+```
+
+The token will be stored in JSON format in the `~/.rulesctl/config` file in your home directory when using the auth command.
 
 > **Important**: Your Personal Access Token needs the following permissions:
 > - Gist (read/write) permissions
