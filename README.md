@@ -42,7 +42,7 @@ rulesctl --help
 rulesctl init
 rulesctl init --sample  # 예제 규칙 파일도 함께 생성
 
-# 규칙 목록 보기 (최근 1달 이내)
+# 규칙 목록 보기 (최근 1달 이내만 표시)
 rulesctl list
 
 # 규칙 업로드하기 (기본적으로 비공개)
@@ -52,6 +52,10 @@ rulesctl upload "규칙세트이름" --public  # 공개 Gist로 업로드
 # 규칙 다운로드하기
 rulesctl download "규칙세트이름"         # 내 Gist에서 제목으로 검색
 rulesctl download --gistid abc123       # 공개 Gist ID로 다운로드
+
+# 규칙 삭제하기
+rulesctl delete "규칙세트이름"           # 제목으로 검색하여 삭제
+rulesctl delete "규칙세트이름" --force    # 확인 없이 바로 삭제
 ```
 
 ### 사용 예시
@@ -87,27 +91,18 @@ rulesctl upload "my-python-ruleset" --public
 rulesctl upload "my-python-ruleset" --force
 ```
 
-> **중요**: 
-> - rulesctl은 현재 실행 경로에 `.cursor/rules/**/*.mdc` 구조가 있어야만 사용할 수 있습니다.
-> - 즉, `.cursor/rules` 디렉토리와 그 하위 디렉토리에 `.mdc` 확장자를 가진 파일들이 있어야 합니다.
-> - 규칙 세트 이름은 따옴표로 감싸서 지정합니다.
-> - 업로드된 규칙은 기본적으로 비공개(secret) Gist로 생성되어 다른 사람이 접근할 수 없습니다.
-> - 다른 사람과 규칙을 공유하고 싶다면 `--public` 옵션을 사용하여 공개 Gist로 업로드하세요.
+규칙 세트 삭제하기:
+```bash
+# 제목으로 검색하여 삭제
+rulesctl delete "my-python-ruleset"
 
-> **경로 구조 예시**:
-> ```
-> .cursor/
-> └── rules/
->     ├── python/
->     │   ├── linting.mdc
->     │   └── testing.mdc
->     └── database/
->         └── postgres.mdc
-> ```
+# 확인 없이 바로 삭제
+rulesctl delete "my-python-ruleset" --force
+```
 
 규칙 목록 확인하기:
 ```bash
-# 사용 가능한 모든 규칙 목록 보기 (최근 1달 이내)
+# 최근 1달 이내에 업로드된 규칙 목록 보기
 rulesctl list
 ```
 
@@ -122,6 +117,15 @@ rulesctl download --gistid abc123
 # 충돌이 있어도 강제로 다운로드
 rulesctl download "my-python-ruleset" --force
 rulesctl download --gistid abc123 --force
+```
+
+규칙 세트 삭제하기:
+```bash
+# 제목으로 검색하여 삭제
+rulesctl delete "my-python-ruleset"
+
+# 확인 없이 바로 삭제
+rulesctl delete "my-python-ruleset" --force
 ```
 
 > **중요**:

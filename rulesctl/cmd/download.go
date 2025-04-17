@@ -50,13 +50,10 @@ var downloadCmd = &cobra.Command{
 			}
 			title := args[0]
 
-			// 1달 전 날짜 계산
-			oneMonthAgo := time.Now().AddDate(0, -1, 0)
-
-			// 내 Gist 목록 가져오기
-			gists, err := gist.FetchUserGists(cfg.Token, oneMonthAgo)
+			// 전체 Gist 목록 조회
+			gists, err := gist.FetchUserGists(nil)
 			if err != nil {
-				return fmt.Errorf("Gist 목록을 가져올 수 없습니다: %w", err)
+				return fmt.Errorf("Gist 목록 조회 실패: %w", err)
 			}
 
 			// 제목으로 Gist 찾기

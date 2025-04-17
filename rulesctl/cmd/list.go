@@ -43,12 +43,11 @@ var listCmd = &cobra.Command{
 			return fmt.Errorf("GitHub 토큰이 설정되지 않았습니다. 'rulesctl auth' 명령어로 토큰을 설정해주세요.")
 		}
 
-		// 1달 전 날짜 계산
-		oneMonthAgo := time.Now().AddDate(0, -1, 0)
-
-		gists, err := gist.FetchUserGists(config.Token, oneMonthAgo)
+		// 최근 1달 이내의 Gist만 조회
+		since := time.Now().AddDate(0, -1, 0)
+		gists, err := gist.FetchUserGists(&since)
 		if err != nil {
-			return fmt.Errorf("GIST 목록을 가져올 수 없습니다: %w", err)
+			return fmt.Errorf("Gist 목록 조회 실패: %w", err)
 		}
 
 		// GIST를 최종 수정 시간 기준으로 정렬
