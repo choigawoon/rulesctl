@@ -108,17 +108,6 @@ func checkConflicts(gistID string) bool {
 }
 ```
 
-## GIST 구조화 저장 방식
-```
-gist/
-├── .cursor/
-│   └── rules/
-│       ├── api-gateway.mdc
-│       └── database/
-│           └── query-builder.mdc
-└── meta.json  # 설명 및 버전 정보
-```
-
 ## 경로 구조 예시
 ```
 .cursor/
@@ -128,6 +117,49 @@ gist/
     │   └── testing.mdc
     └── database/
         └── postgres.mdc
+```
+
+## GIST 구조화 저장 방식
+```
+gist/
+├── rules_python_linting.mdc
+├── rules_python_testing.mdc
+├── rules_database_postgres.mdc
+└── meta.json  # 디렉토리 구조 및 파일 메타데이터
+```
+
+`meta.json` 파일 구조:
+```json
+{
+  "schema_version": "1.0.0",
+  "cli_version": "0.1.0",
+  "structure": {
+    "rules": {
+      "python": {
+        "linting.mdc": {
+          "path": "python/linting.mdc",
+          "gist_name": "rules_python_linting.mdc",
+          "size": 1234,
+          "md5": "a1b2c3d4e5f6g7h8i9j0"
+        },
+        "testing.mdc": {
+          "path": "python/testing.mdc",
+          "gist_name": "rules_python_testing.mdc",
+          "size": 2345,
+          "md5": "b2c3d4e5f6g7h8i9j0a1"
+        }
+      },
+      "database": {
+        "postgres.mdc": {
+          "path": "database/postgres.mdc",
+          "gist_name": "rules_database_postgres.mdc",
+          "size": 3456,
+          "md5": "c3d4e5f6g7h8i9j0a1b2"
+        }
+      }
+    }
+  }
+}
 ```
 
 ## NPM 배포
