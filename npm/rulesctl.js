@@ -9,7 +9,7 @@ const { execSync } = require("child_process");
 
 const OWNER = "choigawoon";
 const REPO = "rulesctl";
-const VERSION = "v0.1.0";
+const VERSION = "v0.1.1";
 
 async function downloadFile(url, dest) {
   console.log(`Downloading from: ${url}`);
