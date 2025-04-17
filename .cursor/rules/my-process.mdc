@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# README.md Rules
+
+- README.md is for the user
+- Clearly explain the problem this tool solves and why it matters — the user should immediately understand the value
+- Start with a short Problem → Solution section
+- Follow with a Usage section using clear examples (e.g., installation, CLI commands)
+- End with a Contribution section, but keep it short — link to `docs/GET-STARTED.md` for full contributor onboarding
+- You can use markdown for formatting, but it's optional — clarity and consistency come first

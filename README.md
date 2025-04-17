@@ -1,0 +1,117 @@
+# rulesctl
+
+## 문제 → 솔루션
+
+**문제**: 여러 프로젝트(POC, MVP, 프로토타입 등)를 다룰 때마다 동일한 규칙(Rules)을 반복적으로 복사하거나 만들어야 하는 불편함이 있습니다.
+
+**솔루션**: rulesctl은 특정 기술 스택에 대해 한 번 만들어둔 규칙 세트를 쉽게 관리하고 재사용할 수 있게 해주는 CLI 도구입니다. 이 도구를 사용하면 규칙 세트를 중앙 저장소에 저장하고 필요할 때 쉽게 가져와 사용할 수 있습니다.
+
+## 사용법
+
+### 설치
+
+NPM을 통해 설치할 수 있습니다:
+
+```bash
+npm install -g rulesctl
+```
+
+### 인증 설정 (필수)
+
+rulesctl을 사용하기 전에 **반드시** GitHub 인증 설정을 해야 합니다:
+
+```bash
+rulesctl auth
+```
+
+명령어 실행 시 GitHub Personal Access Token을 입력하는 창이 나타납니다. 토큰은 사용자의 홈 디렉토리 `~/.rulesctl/config` 파일에 JSON 형식으로 저장됩니다.
+
+> **중요**: Personal Access Token에는 다음 권한이 필요합니다:
+> - Gist (read/write) 권한
+> - repo 권한 (https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules-new 에서 파일 목록 접근용)
+
+토큰 생성 방법은 [GitHub 공식 문서](https://docs.github.com/ko/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)를 참고하세요.
+
+### 기본 명령어
+
+```bash
+# 도움말 보기
+rulesctl --help
+
+# 규칙 목록 보기
+rulesctl list
+
+# 규칙 업로드하기
+rulesctl upload "규칙세트이름"
+
+# 규칙 다운로드하기
+rulesctl download "규칙세트이름"
+```
+
+### 사용 예시
+
+먼저 인증 설정을 합니다:
+```bash
+# GitHub 토큰으로 인증
+rulesctl auth
+# 프롬프트에 Personal Access Token 입력
+```
+
+규칙 세트 업로드하기:
+```bash
+# 현재 디렉토리의 규칙을 특정 이름으로 업로드
+rulesctl upload "my-python-ruleset"
+
+# 특정 이름과 설명으로 업로드
+rulesctl upload "my-python-ruleset" --desc "Python 프로젝트를 위한 규칙 모음"
+
+# 중복된 이름으로 강제 업로드 (확인 프롬프트 없음)
+rulesctl upload "my-python-ruleset" --force
+```
+
+> **중요**: 
+> - rulesctl은 현재 실행 경로에 `.cursor/rules/**/*.mdc` 구조가 있어야만 사용할 수 있습니다.
+> - 즉, `.cursor/rules` 디렉토리와 그 하위 디렉토리에 `.mdc` 확장자를 가진 파일들이 있어야 합니다.
+> - 규칙 세트 이름은 따옴표로 감싸서 지정합니다.
+
+> **경로 구조 예시**:
+> ```
+> .cursor/
+> └── rules/
+>     ├── python/
+>     │   ├── linting.mdc
+>     │   └── testing.mdc
+>     └── database/
+>         └── postgres.mdc
+> ```
+
+규칙 목록 확인하기:
+```bash
+# 사용 가능한 모든 규칙 목록 보기
+rulesctl list
+```
+
+규칙 세트 다운로드하기:
+```bash
+# 특정 규칙 세트를 현재 디렉토리의 .cursor/rules에 다운로드
+rulesctl download "my-python-ruleset"
+
+# 충돌이 있어도 강제로 다운로드
+rulesctl download "my-python-ruleset" --force
+```
+
+> **중요**:
+> - 다운로드 시 현재 실행 경로에 `.cursor/rules` 디렉토리가 없으면 자동으로 생성됩니다.
+> - 원래 업로드된 디렉토리 구조와 파일들이 그대로 복원됩니다.
+> - 다운로드 후 바로 사용할 수 있는 상태로 준비됩니다.
+
+## 지원 플랫폼
+
+rulesctl은 다음 플랫폼을 지원합니다:
+- macOS (darwin)
+- Linux
+- Windows
+
+## 기여하기
+
+rulesctl 프로젝트에 기여하고 싶다면 [개발자 가이드](docs/GET-STARTED.md)를 참고하세요. 이 프로젝트는 Go로 작성되었으며, NPM을 통해 배포됩니다. 

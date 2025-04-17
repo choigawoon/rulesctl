@@ -1,0 +1,17 @@
+{
+    "name": "rulesctl",
+    "author": "choigawoon",
+    "description": "rulesctl is a tool to manage rules for the rules engine.",
+    "version": "0.1.0",
+    "bin": {
+      "rulesctl": "./rulesctl.js"
+    },
+    "files": [
+      "rulesctl.js",
+      "bin/"
+    ],
+    "os": ["darwin", "linux", "win32"],
+    "scripts": {},
+    "license": "MIT"
+  }
+  
