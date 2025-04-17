@@ -1,152 +1,152 @@
 # rulesctl
 
-GitHub Gist를 이용한 Cursor Rules 관리 도구
+Cursor Rules management tool using GitHub Gist
 
-## 문제 → 해결책
+## Problem → Solution
 
-Cursor Rules를 효과적으로 관리하고 공유하기 위한 도구가 필요했습니다. rulesctl은 GitHub Gist를 활용하여 규칙을 체계적으로 저장하고 관리할 수 있게 해줍니다.
+We needed a tool to effectively manage and share Cursor Rules. rulesctl allows you to systematically store and manage rules using GitHub Gist.
 
-## 사용법
+## Usage
 
-### 설치
+### Installation
 
-NPM을 통해 설치할 수 있습니다:
+You can install via NPM:
 
 ```bash
 npm install -g rulesctl
 ```
 
-### 인증 설정 (필수)
+### Authentication Setup (Required)
 
-rulesctl을 사용하기 전에 **반드시** GitHub 인증 설정을 해야 합니다:
+You **must** set up GitHub authentication before using rulesctl:
 
 ```bash
 rulesctl auth
 ```
 
-명령어 실행 시 GitHub Personal Access Token을 입력하는 창이 나타납니다. 토큰은 사용자의 홈 디렉토리 `~/.rulesctl/config` 파일에 JSON 형식으로 저장됩니다.
+When you run the command, a prompt will appear for entering your GitHub Personal Access Token. The token is stored in JSON format in the `~/.rulesctl/config` file in your home directory.
 
-> **중요**: Personal Access Token에는 다음 권한이 필요합니다:
-> - Gist (read/write) 권한
-> - repo 권한 (https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules-new 에서 파일 목록 접근용)
+> **Important**: Your Personal Access Token needs the following permissions:
+> - Gist (read/write) permissions
+> - repo permissions (for accessing file lists at https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules-new)
 
-토큰 생성 방법은 [GitHub 공식 문서](https://docs.github.com/ko/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)를 참고하세요.
+For information on how to create a token, refer to the [GitHub official documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-### 기본 명령어
+### Basic Commands
 
 ```bash
-# 도움말 보기
+# View help
 rulesctl --help
 
-# 규칙 디렉토리 생성
+# Create rules directory
 rulesctl init
-rulesctl init --sample  # 예제 규칙 파일도 함께 생성
+rulesctl init --sample  # Also create example rule files
 
-# 규칙 목록 보기 (최근 1달 이내만 표시)
+# View rule list (only shows those from the last month)
 rulesctl list
 
-# 규칙 업로드하기 (기본적으로 비공개)
-rulesctl upload "규칙세트이름"
-rulesctl upload "규칙세트이름" --public  # 공개 Gist로 업로드
+# Upload rules (private by default)
+rulesctl upload "RuleSetName"
+rulesctl upload "RuleSetName" --public  # Upload as public Gist
 
-# 규칙 다운로드하기
-rulesctl download "규칙세트이름"         # 내 Gist에서 제목으로 검색
-rulesctl download --gistid abc123       # 공개 Gist ID로 다운로드
+# Download rules
+rulesctl download "RuleSetName"         # Search by title in my Gist
+rulesctl download --gistid abc123       # Download by public Gist ID
 
-# 규칙 삭제하기
-rulesctl delete "규칙세트이름"           # 제목으로 검색하여 삭제
-rulesctl delete "규칙세트이름" --force    # 확인 없이 바로 삭제
+# Delete rules
+rulesctl delete "RuleSetName"           # Search and delete by title
+rulesctl delete "RuleSetName" --force   # Delete immediately without confirmation
 ```
 
-### 사용 예시
+### Usage Examples
 
-먼저 인증 설정을 합니다:
+First, set up authentication:
 ```bash
-# GitHub 토큰으로 인증
+# Authenticate with GitHub token
 rulesctl auth
-# 프롬프트에 Personal Access Token 입력
+# Enter Personal Access Token at prompt
 ```
 
-규칙 디렉토리 생성하기:
+Creating a rules directory:
 ```bash
-# .cursor/rules 디렉토리 생성
+# Create .cursor/rules directory
 rulesctl init
 
-# 예제와 함께 시작하기
+# Start with examples
 rulesctl init --sample
 ```
 
-규칙 세트 업로드하기:
+Uploading a rule set:
 ```bash
-# 현재 디렉토리의 규칙을 특정 이름으로 업로드 (기본적으로 비공개)
+# Upload rules from current directory with a specific name (private by default)
 rulesctl upload "my-python-ruleset"
 
-# 특정 이름과 설명으로 업로드
-rulesctl upload "my-python-ruleset" --desc "Python 프로젝트를 위한 규칙 모음"
+# Upload with a name and description
+rulesctl upload "my-python-ruleset" --desc "Rule collection for Python projects"
 
-# 다른 사람과 공유하기 위해 공개로 업로드
+# Public upload for sharing with others
 rulesctl upload "my-python-ruleset" --public
 
-# 중복된 이름으로 강제 업로드 (확인 프롬프트 없음)
+# Force upload with duplicate name (no confirmation prompt)
 rulesctl upload "my-python-ruleset" --force
 ```
 
-규칙 세트 삭제하기:
+Deleting a rule set:
 ```bash
-# 제목으로 검색하여 삭제
+# Search and delete by title
 rulesctl delete "my-python-ruleset"
 
-# 확인 없이 바로 삭제
+# Delete immediately without confirmation
 rulesctl delete "my-python-ruleset" --force
 ```
 
-규칙 목록 확인하기:
+Checking the rules list:
 ```bash
-# 최근 1달 이내에 업로드된 규칙 목록 보기
+# View list of rules uploaded in the last month
 rulesctl list
 ```
 
-규칙 세트 다운로드하기:
+Downloading a rule set:
 ```bash
-# 내 Gist에서 제목으로 검색하여 다운로드
+# Download by searching for title in my Gist
 rulesctl download "my-python-ruleset"
 
-# 공개된 Gist를 ID로 직접 다운로드
+# Download directly by ID from a public Gist
 rulesctl download --gistid abc123
 
-# 충돌이 있어도 강제로 다운로드
+# Force download even with conflicts
 rulesctl download "my-python-ruleset" --force
 rulesctl download --gistid abc123 --force
 ```
 
-규칙 세트 삭제하기:
+Deleting a rule set:
 ```bash
-# 제목으로 검색하여 삭제
+# Search and delete by title
 rulesctl delete "my-python-ruleset"
 
-# 확인 없이 바로 삭제
+# Delete immediately without confirmation
 rulesctl delete "my-python-ruleset" --force
 ```
 
-> **중요**:
-> - 다운로드는 두 가지 방식을 지원합니다:
->   1. 제목으로 다운로드: 내 Gist 목록에서 제목이 정확히 일치하는 규칙을 찾아 다운로드
->   2. Gist ID로 다운로드: 공개된 Gist의 ID를 직접 지정하여 다운로드
-> - 다운로드 시 현재 실행 경로에 `.cursor/rules` 디렉토리가 없으면 자동으로 생성됩니다.
-> - 원래 업로드된 디렉토리 구조와 파일들이 그대로 복원됩니다.
-> - 다운로드 후 바로 사용할 수 있는 상태로 준비됩니다.
+> **Important**:
+> - Download supports two methods:
+>   1. Download by title: Finds rules with exactly matching title from your Gist list
+>   2. Download by Gist ID: Directly download by specifying the ID of a public Gist
+> - If the `.cursor/rules` directory doesn't exist in the current path during download, it's created automatically
+> - The original directory structure and files are restored exactly as they were uploaded
+> - Files are ready to use immediately after download
 
-## 지원 플랫폼
+## Supported Platforms
 
-rulesctl은 다음 플랫폼을 지원합니다:
+rulesctl supports the following platforms:
 - macOS (darwin)
 - Linux
 - Windows
 
-## 개발자 가이드
+## Developer Guide
 
-개발 및 테스트 방법은 [개발 시작 가이드](docs/GET-STARTED.md)를 참조하세요.
+For development and testing methods, refer to the [Getting Started Guide](docs/GET-STARTED.md).
 
-## 기여하기
+## Contributing
 
-기여 방법은 [기여 가이드](docs/GET-STARTED.md#기여-가이드)를 참조하세요. 
+For contribution guidelines, refer to the [Contribution Guide](docs/GET-STARTED.md#contributing). 
