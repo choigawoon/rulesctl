@@ -15,7 +15,7 @@ builds:
     binary: rulesctl
     dir: .
     ldflags:
-      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+      - -s -w -X github.com/choigawoon/rulesctl/internal/version.Version={{.Version}} -X github.com/choigawoon/rulesctl/internal/version.BuildTime={{.Date}} -X github.com/choigawoon/rulesctl/internal/version.GitCommit={{.Commit}}
     mod_timestamp: '{{ .CommitTimestamp }}'
     targets:
       - linux_amd64
