@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-const MetaFileName = "meta.json"
-
 type FileMetadata struct {
 	Path     string `json:"path"`     // 원본 파일 경로
 	GistName string `json:"gist_name"` // Gist에서의 파일 이름

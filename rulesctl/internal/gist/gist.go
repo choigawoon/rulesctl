@@ -9,6 +9,8 @@ import (
 
 var baseURL = "https://api.github.com"
 
+const MetaFileName = ".rulesctl.meta.json"
+
 // Gist는 GitHub Gist의 기본 정보를 나타냅니다
 type Gist struct {
 	ID          string    `json:"id"`
@@ -25,9 +27,13 @@ type Gist struct {
 }
 
 // FetchUserGists는 사용자의 모든 Gist를 가져옵니다
-func FetchUserGists(token string) ([]Gist, error) {
+func FetchUserGists(token string, since time.Time) ([]Gist, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", baseURL+"/gists", nil)
+	
+	// since 파라미터 추가
+	url := fmt.Sprintf("%s/gists?since=%s", baseURL, since.Format(time.RFC3339))
+	
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("요청 생성 실패: %w", err)
 	}
@@ -50,5 +56,13 @@ func FetchUserGists(token string) ([]Gist, error) {
 		return nil, fmt.Errorf("응답 파싱 실패: %w", err)
 	}
 
-	return gists, nil
+	// .rulesctl.meta.json 파일이 있는 Gist만 필터링
+	var rulesctlGists []Gist
+	for _, g := range gists {
+		if _, hasRulesctlMeta := g.Files[MetaFileName]; hasRulesctlMeta {
+			rulesctlGists = append(rulesctlGists, g)
+		}
+	}
+
+	return rulesctlGists, nil
 } 
