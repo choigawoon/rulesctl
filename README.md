@@ -38,14 +38,16 @@ rulesctl auth
 # 도움말 보기
 rulesctl --help
 
-# 규칙 목록 보기
+# 규칙 목록 보기 (최근 1달 이내)
 rulesctl list
 
-# 규칙 업로드하기
+# 규칙 업로드하기 (기본적으로 비공개)
 rulesctl upload "규칙세트이름"
+rulesctl upload "규칙세트이름" --public  # 공개 Gist로 업로드
 
 # 규칙 다운로드하기
-rulesctl download "규칙세트이름"
+rulesctl download "규칙세트이름"         # 내 Gist에서 제목으로 검색
+rulesctl download --gistid abc123       # 공개 Gist ID로 다운로드
 ```
 
 ### 사용 예시
@@ -59,11 +61,14 @@ rulesctl auth
 
 규칙 세트 업로드하기:
 ```bash
-# 현재 디렉토리의 규칙을 특정 이름으로 업로드
+# 현재 디렉토리의 규칙을 특정 이름으로 업로드 (기본적으로 비공개)
 rulesctl upload "my-python-ruleset"
 
 # 특정 이름과 설명으로 업로드
 rulesctl upload "my-python-ruleset" --desc "Python 프로젝트를 위한 규칙 모음"
+
+# 다른 사람과 공유하기 위해 공개로 업로드
+rulesctl upload "my-python-ruleset" --public
 
 # 중복된 이름으로 강제 업로드 (확인 프롬프트 없음)
 rulesctl upload "my-python-ruleset" --force
@@ -73,6 +78,8 @@ rulesctl upload "my-python-ruleset" --force
 > - rulesctl은 현재 실행 경로에 `.cursor/rules/**/*.mdc` 구조가 있어야만 사용할 수 있습니다.
 > - 즉, `.cursor/rules` 디렉토리와 그 하위 디렉토리에 `.mdc` 확장자를 가진 파일들이 있어야 합니다.
 > - 규칙 세트 이름은 따옴표로 감싸서 지정합니다.
+> - 업로드된 규칙은 기본적으로 비공개(secret) Gist로 생성되어 다른 사람이 접근할 수 없습니다.
+> - 다른 사람과 규칙을 공유하고 싶다면 `--public` 옵션을 사용하여 공개 Gist로 업로드하세요.
 
 > **경로 구조 예시**:
 > ```
@@ -87,20 +94,27 @@ rulesctl upload "my-python-ruleset" --force
 
 규칙 목록 확인하기:
 ```bash
-# 사용 가능한 모든 규칙 목록 보기
+# 사용 가능한 모든 규칙 목록 보기 (최근 1달 이내)
 rulesctl list
 ```
 
 규칙 세트 다운로드하기:
 ```bash
-# 특정 규칙 세트를 현재 디렉토리의 .cursor/rules에 다운로드
+# 내 Gist에서 제목으로 검색하여 다운로드
 rulesctl download "my-python-ruleset"
+
+# 공개된 Gist를 ID로 직접 다운로드
+rulesctl download --gistid abc123
 
 # 충돌이 있어도 강제로 다운로드
 rulesctl download "my-python-ruleset" --force
+rulesctl download --gistid abc123 --force
 ```
 
 > **중요**:
+> - 다운로드는 두 가지 방식을 지원합니다:
+>   1. 제목으로 다운로드: 내 Gist 목록에서 제목이 정확히 일치하는 규칙을 찾아 다운로드
+>   2. Gist ID로 다운로드: 공개된 Gist의 ID를 직접 지정하여 다운로드
 > - 다운로드 시 현재 실행 경로에 `.cursor/rules` 디렉토리가 없으면 자동으로 생성됩니다.
 > - 원래 업로드된 디렉토리 구조와 파일들이 그대로 복원됩니다.
 > - 다운로드 후 바로 사용할 수 있는 상태로 준비됩니다.

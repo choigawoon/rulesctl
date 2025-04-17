@@ -23,6 +23,7 @@ type Gist struct {
 		Language string `json:"language"`
 		RawURL   string `json:"raw_url"`
 		Size     int    `json:"size"`
+		Content  string `json:"content"`
 	} `json:"files"`
 }
 
