@@ -89,4 +89,7 @@ rulesctl delete "test"
 
 3. NPM Deployment
 - Verify version in `package.json` is correct
-- Always test locally before publishing 
+- Always test locally before publishing
+- Wait approximately 5-10 minutes after GitHub Release deployment before proceeding with npm deployment
+  - GitHub Release API responses may be cached and not reflect changes immediately
+  - Allow sufficient time between deployments for proper version installation 

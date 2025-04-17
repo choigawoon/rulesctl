@@ -181,4 +181,48 @@ This document breaks down each task phase to be completable within **1 hour**. T
 - Gist revision specific download feature
   - Feature to download rule sets of specific revisions
   - Specify specific version through `--revision` flag
-  - Add revision history view feature 
+  - Add revision history view feature
+
+## Current Issues
+
+### Version Management Improvement
+1. Version Information Centralization
+   - [x] Created internal/version/version.go package
+   - [x] Updated goreleaser ldflags configuration
+   - [ ] NPM package version synchronization issue
+     - Current situation: Version shows as 0.1.0 when installing locally with npm install -g ./rulesctl-0.1.2.tgz
+     - Causes: 
+       1. Binary built by goreleaser differs from npm package binary
+       2. VERSION constant in npm/rulesctl.js doesn't match actual binary version
+       3. GitHub Release API caching issue
+          - New version downloads correctly only after some time has passed since GitHub release deployment
+          - API responses are likely cached and not immediately reflected
+     - Potential solutions:
+       1. Copy goreleaser build binaries to npm/bin before npm pack
+       2. Download binaries from GitHub releases even for local installation
+       3. Review goreleaser post hooks modification
+       4. Wait for a period (about 5-10 minutes) after GitHub Release deployment before proceeding with npm deployment
+
+### Next Steps
+1. Resolve Version Management Issue
+   - [ ] Decide npm package installation method (local binary vs GitHub releases)
+   - [ ] Modify rulesctl.js
+   - [ ] Test installation process
+   - [ ] Update DEPLOY.md documentation
+
+2. Remaining Tasks
+   - [ ] Improve error handling and logging
+   - [ ] Enhance progress display
+   - [ ] Improve usage and help documentation
+   - [ ] Set up GitHub Actions workflow
+
+## Future Features (2nd Milestone)
+- Rule search functionality
+- Rule sharing and team collaboration features
+- Rule version management
+- Web interface development
+- Rule templates and scaffolding features
+- Gist revision specific download feature
+  - Ability to download specific revision of rule sets
+  - Use `--revision` flag to specify version
+  - Add revision history viewing functionality 
