@@ -112,11 +112,17 @@ rulesctl 프로젝트에 기여하고 싶다면 다음 단계를 따르세요:
 
 ## 빌드 및 배포
 
-### goreleaser를 사용한 빌드
+### goreleaser를 사용한 릴리즈
 
-1. goreleaser 설치
+1. goreleaser 설정
 ```bash
+# goreleaser 설치
 go install github.com/goreleaser/goreleaser@latest
+
+# .goreleaser.yaml 파일 생성 및 설정
+# - 크로스 플랫폼 빌드 설정
+# - 체인지로그 자동화
+# - 릴리즈 노트 템플릿
 ```
 
 2. 로컬 빌드 테스트
@@ -129,58 +135,54 @@ ls -l bin/           # 최신 빌드 결과물
 ls -l dist/          # 모든 아키텍처별 빌드 결과물
 ```
 
-3. 지원되는 빌드 타겟
-- macOS (Darwin)
-  - arm64 (Apple Silicon M1/M2)
-  - amd64 (Intel)
-- Linux
-  - arm64
-  - amd64
-- Windows
-  - amd64
-
-### 릴리즈 배포
-
-1. 버전 태그 생성
+3. GitHub 릴리즈 생성
 ```bash
-git tag -a v0.1.0 -m "First release"
+# 1. GitHub 토큰 설정
+export GITHUB_TOKEN="your_token"
+
+# 2. 버전 태그 생성
+git tag -a v0.1.0 -m "First release
+
+주요 기능:
+- GitHub Gist를 이용한 Cursor Rules 관리
+- 규칙 업로드/다운로드
+- 크로스 플랫폼 지원 (macOS, Linux, Windows)
+
+변경사항:
+- 초기 버전 릴리즈
+- goreleaser를 통한 크로스 플랫폼 빌드 지원
+- NPM 패키지 배포 준비"
+
+# 3. 태그 푸시
 git push origin v0.1.0
+
+# 4. 릴리즈 생성
+~/go/bin/goreleaser release --clean
 ```
 
-2. 릴리즈 빌드
-```bash
-~/go/bin/goreleaser release
-```
-
-이 명령은 다음 작업을 수행합니다:
-- 모든 플랫폼용 바이너리 빌드
-- 체크섬 생성
-- 변경 로그 생성
+4. 릴리즈 결과물
 - GitHub 릴리즈 페이지에 드래프트 생성
+- 크로스 플랫폼 바이너리 자동 업로드:
+  - macOS (arm64/amd64)
+  - Linux (arm64/amd64)
+  - Windows (amd64)
+- 체크섬 파일 생성
+- 변경 로그 자동 생성
 
-### 빌드 설정 커스터마이징
+5. 릴리즈 공개
+- GitHub 릴리즈 페이지에서 내용 확인
+- "Publish release" 버튼 클릭하여 공개
 
-빌드 설정은 `.goreleaser.yaml` 파일에서 관리됩니다:
-- 빌드 대상 플랫폼/아키텍처 추가/제거
-- 빌드 후크 스크립트 수정
-- 아카이브 포맷 변경
-- 릴리즈 설정 변경
-
-자세한 설정 옵션은 [goreleaser 공식 문서](https://goreleaser.com/customization/)를 참조하세요.
+이렇게 생성된 릴리즈의 바이너리 URL들은 NPM 패키지의 설치 스크립트에서 사용됩니다.
 
 ### NPM 패키지 배포
 
-1. NPM 패키지 구조 설정
+1. NPM 패키지 구조
 ```bash
-# 패키지 디렉토리 생성
-mkdir -p npm
-cd npm
-
-# package.json 초기화
-npm init -y
-
-# 필요한 의존성 설치
-npm install --save-dev @octokit/rest
+npm/
+├── package.json     # 패키지 메타데이터 및 설치 스크립트
+├── rulesctl.js      # 실행 및 설치 스크립트
+└── bin/            # 바이너리가 설치될 디렉토리 (비어있어도 됨)
 ```
 
 2. `package.json` 설정
@@ -188,108 +190,45 @@ npm install --save-dev @octokit/rest
 {
   "name": "rulesctl",
   "version": "0.1.0",
-  "description": "GitHub Gist를 이용한 Cursor Rules 관리 도구",
   "bin": {
-    "rulesctl": "./bin/rulesctl"
-  },
-  "scripts": {
-    "postinstall": "node scripts/install.js"
+    "rulesctl": "./rulesctl.js"
   },
   "files": [
-    "bin",
-    "scripts"
+    "rulesctl.js",
+    "bin/"
   ],
-  "keywords": ["cursor", "rules", "gist"],
-  "author": "choigawoon",
-  "license": "MIT"
-}
-```
-
-3. 바이너리 다운로드 스크립트 작성 (`scripts/install.js`)
-```javascript
-const { Octokit } = require('@octokit/rest');
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
-const os = require('os');
-
-const OWNER = 'choigawoon';
-const REPO = 'rulesctl';
-
-async function getLatestRelease() {
-  const octokit = new Octokit();
-  const { data } = await octokit.repos.getLatestRelease({
-    owner: OWNER,
-    repo: REPO
-  });
-  return data;
-}
-
-function getPlatformAsset(assets) {
-  const platform = os.platform();
-  const arch = os.arch();
-  
-  const platformMap = {
-    'darwin': 'Darwin',
-    'linux': 'Linux',
-    'win32': 'Windows'
-  };
-  
-  const archMap = {
-    'x64': 'x86_64',
-    'arm64': 'arm64'
-  };
-  
-  const assetPattern = `${REPO}_${platformMap[platform]}_${archMap[arch]}`;
-  return assets.find(asset => asset.name.includes(assetPattern));
-}
-
-async function downloadBinary(url, dest) {
-  return new Promise((resolve, reject) => {
-    https.get(url, response => {
-      if (response.statusCode === 302) {
-        https.get(response.headers.location, response => {
-          const file = fs.createWriteStream(dest);
-          response.pipe(file);
-          file.on('finish', () => {
-            file.close();
-            fs.chmodSync(dest, '755');
-            resolve();
-          });
-        }).on('error', reject);
-      }
-    }).on('error', reject);
-  });
-}
-
-async function install() {
-  try {
-    const release = await getLatestRelease();
-    const asset = getPlatformAsset(release.assets);
-    
-    if (!asset) {
-      throw new Error('No matching binary found for your platform');
-    }
-    
-    const binPath = path.join(__dirname, '..', 'bin');
-    if (!fs.existsSync(binPath)) {
-      fs.mkdirSync(binPath, { recursive: true });
-    }
-    
-    const dest = path.join(binPath, os.platform() === 'win32' ? 'rulesctl.exe' : 'rulesctl');
-    await downloadBinary(asset.browser_download_url, dest);
-    
-    console.log('rulesctl binary installed successfully!');
-  } catch (error) {
-    console.error('Failed to install rulesctl:', error);
-    process.exit(1);
+  "scripts": {
+    "postinstall": "node rulesctl.js install"
   }
 }
-
-install();
 ```
 
-4. NPM 패키지 배포
+3. 설치 스크립트 작동 방식
+- `npm install -g rulesctl` 실행 시:
+  1. NPM이 패키지 설치
+  2. postinstall 스크립트 실행
+  3. GitHub 릴리즈에서 해당 플랫폼 바이너리 자동 다운로드
+  4. 실행 권한 설정
+
+4. 로컬 테스트
+```bash
+# 패키지 디렉토리로 이동
+cd npm
+
+# bin 디렉토리 생성
+mkdir -p bin
+
+# 패키지 생성
+npm pack
+
+# 로컬 설치 테스트
+npm install -g ./rulesctl-0.1.0.tgz
+
+# 설치 확인
+rulesctl --version
+```
+
+5. NPM 배포
 ```bash
 # NPM 로그인
 npm login
@@ -297,17 +236,20 @@ npm login
 # 패키지 배포
 npm publish
 
-# 특정 태그로 배포
-npm publish --tag beta  # 베타 버전으로 배포
+# 특정 태그로 배포 (옵션)
+npm publish --tag beta
 ```
 
-5. 배포 후 설치 테스트
+6. 설치 및 사용
 ```bash
-# 글로벌 설치 테스트
+# 글로벌 설치
 npm install -g rulesctl
 
-# 실행 테스트
-rulesctl --version
+# 사용
+rulesctl --help
 ```
 
-자세한 설정 옵션은 [goreleaser 공식 문서](https://goreleaser.com/customization/)를 참조하세요.
+주의사항:
+- GitHub 릴리즈가 공개되어 있어야 함
+- 릴리즈의 바이너리 URL이 올바르게 설정되어 있어야 함
+- `package.json`의 버전과 GitHub 릴리즈 태그가 일치해야 함

@@ -3,16 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
-# Generate Commit Message Rule
-- Write commit message in English
-- format like
-
-```
-Summary
-- issue, action
-- issue, action
-```
-
+# 명령어 실행해야할 때 규칙
+- 실행전 반드시 현재 디렉토리를 먼저 확인하는 명령어를 실행하고, 진행
 
 # README.md Rules
 

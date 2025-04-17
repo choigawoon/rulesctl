@@ -11,7 +11,18 @@
       "bin/"
     ],
     "os": ["darwin", "linux", "win32"],
-    "scripts": {},
+    "scripts": {
+      "postinstall": "node rulesctl.js install"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/choigawoon/rulesctl.git"
+    },
+    "keywords": [
+      "cursor",
+      "rules",
+      "gist"
+    ],
     "license": "MIT"
   }
   
