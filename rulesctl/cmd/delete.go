@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"time"
 
+	"github.com/choigawoon/rulesctl/internal/gist"
 	"github.com/spf13/cobra"
 )
 
@@ -30,15 +30,17 @@ var deleteCmd = &cobra.Command{
 		}
 
 		// 제목으로 Gist 찾기
-		var targetGist *gist.Gist
+		var targetGist gist.Gist
+		found := false
 		for _, g := range gists {
 			if g.Description == title {
 				targetGist = g
+				found = true
 				break
 			}
 		}
 
-		if targetGist == nil {
+		if !found {
 			return fmt.Errorf("규칙 세트를 찾을 수 없습니다: %s", title)
 		}
 

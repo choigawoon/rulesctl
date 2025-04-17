@@ -5,7 +5,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/choigawoon/rulesctl/internal/gist"
 	"github.com/choigawoon/rulesctl/pkg/config"
-	"time"
 )
 
 var (
