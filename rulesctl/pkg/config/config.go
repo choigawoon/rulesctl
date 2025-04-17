@@ -71,6 +71,10 @@ func SaveConfig(config *Config) error {
 
 // SaveToken은 GitHub 토큰을 저장합니다
 func SaveToken(token string) error {
+	if token == "" {
+		return fmt.Errorf("토큰이 비어있습니다")
+	}
+
 	config, err := LoadConfig()
 	if err != nil {
 		return err
