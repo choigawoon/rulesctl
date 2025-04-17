@@ -1,5 +1,12 @@
 # rulesctl 구현 가이드
 
+## 기술 스택
+- **Go**: 메인 개발 언어
+- **Cobra**: CLI 프레임워크
+- **GitHub API v3**: GIST 관리
+- **JSON**: 설정 및 메타데이터 저장
+- **MD5**: 파일 무결성 검증
+
 ## 아키텍처 설계
 ```
 project-root/
