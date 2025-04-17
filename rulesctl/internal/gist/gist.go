@@ -27,12 +27,12 @@ type Gist struct {
 		Size     int    `json:"size"`
 		Content  string `json:"content"`
 	} `json:"files"`
-	Version     int       `json:"version"`
-	History     []struct {
-		Version   int       `json:"version"`
+	History []struct {
+		Version   string    `json:"version"`
 		CommitID  string    `json:"commit_id"`
 		UpdatedAt time.Time `json:"updated_at"`
 	} `json:"history"`
+	RevisionNumber int // GitHub 웹 UI와 동일한 순번 (최신이 1)
 }
 
 // FetchUserGists는 사용자의 Gist를 가져옵니다
@@ -91,7 +91,7 @@ func FetchUserGists(since *time.Time) ([]Gist, error) {
 
 // FetchGistWithHistory는 특정 Gist의 상세 정보와 히스토리를 가져옵니다
 func FetchGistWithHistory(token, gistID string) (*Gist, error) {
-	url := fmt.Sprintf("https://api.github.com/gists/%s", gistID)
+	url := fmt.Sprintf("%s/gists/%s", baseURL, gistID)
 	
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -116,10 +116,9 @@ func FetchGistWithHistory(token, gistID string) (*Gist, error) {
 		return nil, err
 	}
 
-	// History가 있으면 최신 버전 번호 설정
-	if len(gist.History) > 0 {
-		gist.Version = gist.History[0].Version
-	}
+	// History 길이를 기준으로 RevisionNumber 설정
+	// 최신이 Rev 1이 되도록 함
+	gist.RevisionNumber = len(gist.History)
 	
 	return &gist, nil
 }

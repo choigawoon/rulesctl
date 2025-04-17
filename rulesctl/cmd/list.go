@@ -102,7 +102,7 @@ var listCmd = &cobra.Command{
 				if err != nil {
 					continue // 히스토리 조회 실패 시 건너뛰기
 				}
-				rev := truncateString(fmt.Sprintf("%d", gistDetail.Version), revWidth)
+				rev := truncateString(fmt.Sprintf("%d", gistDetail.RevisionNumber), revWidth)
 				fmt.Printf("%s  %s  %s  %s\n", title, date, id, rev)
 			} else {
 				fmt.Printf("%s  %s  %s\n", title, date, id)
