@@ -23,35 +23,69 @@ var uploadCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		
+		// 0. 규칙 디렉토리 확인 및 생성
+		if err := fileutils.EnsureRulesDir(); err != nil {
+			return fmt.Errorf("규칙 디렉토리 생성 실패: %v", err)
+		}
+		
 		// 1. 로컬 규칙 파일 수집
 		rules, err := fileutils.ListLocalRules()
 		if err != nil {
-			return fmt.Errorf("로컬 규칙 파일 수집 실패: %v", err)
+			// 파일이 없는 경우 안내 메시지 출력
+			rulesDir, _ := fileutils.GetRulesDirPath()
+			fmt.Printf("안내: %v\n", err)
+			fmt.Printf("현재 규칙 디렉토리: %s\n", rulesDir)
+			fmt.Printf("다음 명령어로 규칙 파일을 추가할 수 있습니다:\n")
+			fmt.Printf("  mkdir -p %s/python\n", rulesDir)
+			fmt.Printf("  echo \"Python 린팅 규칙\" > %s/python/linting.mdc\n", rulesDir)
+			return fmt.Errorf("업로드할 규칙 파일이 없습니다")
 		}
 
-		if len(rules) == 0 {
-			return fmt.Errorf("업로드할 규칙 파일이 없습니다. .cursor/rules 디렉토리에 규칙 파일을 추가해주세요")
+		// 2. 메타데이터 생성
+		metadata := gist.NewMetadata()
+		files := make(map[string]gist.File)
+
+		// 3. 파일 내용 읽기 및 메타데이터 수집
+		rulesDir, err := fileutils.GetRulesDirPath()
+		if err != nil {
+			return fmt.Errorf("규칙 디렉토리 경로 확인 실패: %v", err)
 		}
 
-		// 2. Gist 클라이언트 초기화
+		for path := range rules {
+			fullPath := filepath.Join(rulesDir, path)
+			content, err := os.ReadFile(fullPath)
+			if err != nil {
+				return fmt.Errorf("파일 읽기 실패 %s: %v", path, err)
+			}
+
+			// 메타데이터에 파일 추가
+			if err := metadata.AddFile(path); err != nil {
+				return fmt.Errorf("메타데이터 추가 실패 %s: %v", path, err)
+			}
+
+			// Gist 파일 맵에 변환된 이름으로 추가
+			gistName := metadata.GetGistName(path)
+			files[gistName] = gist.File{
+				Content: string(content),
+			}
+		}
+
+		// 4. 메타데이터 파일 추가
+		metaContent, err := metadata.ToJSON()
+		if err != nil {
+			return fmt.Errorf("메타데이터 JSON 생성 실패: %v", err)
+		}
+		files[gist.MetaFileName] = gist.File{
+			Content: string(metaContent),
+		}
+
+		// 5. Gist 클라이언트 초기화
 		client, err := gist.NewClient()
 		if err != nil {
 			return fmt.Errorf("Gist 클라이언트 초기화 실패: %v", err)
 		}
 
-		// 3. 파일 내용 읽기 및 Gist 파일 생성
-		files := make(map[string]gist.File)
-		for path, _ := range rules {
-			content, err := os.ReadFile(filepath.Join(fileutils.RulesDirName, path))
-			if err != nil {
-				return fmt.Errorf("파일 읽기 실패 %s: %v", path, err)
-			}
-			files[path] = gist.File{
-				Content: string(content),
-			}
-		}
-
-		// 4. Gist 생성 또는 업데이트
+		// 6. Gist 생성 또는 업데이트
 		gistID, err := client.CreateOrUpdateGist(name, files, forceUpload)
 		if err != nil {
 			return fmt.Errorf("Gist 업로드 실패: %v", err)

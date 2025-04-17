@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -39,6 +40,23 @@ func NewMetadata() *Metadata {
 	}
 }
 
+// convertToGistName은 원본 파일 경로를 Gist 파일 이름으로 변환합니다.
+// 예: python/linting.mdc -> python_linting.mdc
+func convertToGistName(path string) string {
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
+	ext := filepath.Ext(base)
+	name := strings.TrimSuffix(base, ext)
+
+	if dir == "." {
+		return name + ext
+	}
+
+	// 디렉토리 구분자를 언더스코어로 변환
+	dirParts := strings.Split(dir, string(filepath.Separator))
+	return strings.Join(dirParts, "_") + "_" + name + ext
+}
+
 func (m *Metadata) AddFile(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -58,11 +76,8 @@ func (m *Metadata) AddFile(path string) error {
 		return err
 	}
 
-	// 파일 메타데이터 추가
-	gistName := filepath.Base(path)
-	if filepath.Dir(path) != "." {
-		gistName = filepath.Join(filepath.Dir(path), gistName)
-	}
+	// Gist 파일 이름 생성
+	gistName := convertToGistName(path)
 
 	metadata := FileMetadata{
 		Path:     path,
@@ -79,7 +94,7 @@ func (m *Metadata) AddFile(path string) error {
 }
 
 func (m *Metadata) updateStructure(path string) {
-	parts := filepath.SplitList(filepath.Clean(path))
+	parts := strings.Split(filepath.ToSlash(path), "/")
 	current := m.Structure
 
 	// 경로의 각 부분을 순회하며 구조 생성
@@ -99,4 +114,14 @@ func (m *Metadata) updateStructure(path string) {
 
 func (m *Metadata) ToJSON() ([]byte, error) {
 	return json.MarshalIndent(m, "", "  ")
+}
+
+// GetGistName은 원본 파일 경로에 대응하는 Gist 파일 이름을 반환합니다.
+func (m *Metadata) GetGistName(path string) string {
+	for _, file := range m.Files {
+		if file.Path == path {
+			return file.GistName
+		}
+	}
+	return convertToGistName(path)
 } 

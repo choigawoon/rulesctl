@@ -129,9 +129,9 @@ func checkConflicts(gistID string) bool {
 ## GIST 구조화 저장 방식
 ```
 gist/
-├── rules_python_linting.mdc
-├── rules_python_testing.mdc
-├── rules_database_postgres.mdc
+├── python_linting.mdc
+├── python_testing.mdc
+├── database_postgres.mdc
 └── meta.json  # 디렉토리 구조 및 파일 메타데이터
 ```
 
@@ -140,34 +140,38 @@ gist/
 {
   "schema_version": "1.0.0",
   "cli_version": "0.1.0",
+  "updated_at": "2024-03-17T12:34:56Z",
   "structure": {
-    "rules": {
-      "python": {
-        "linting.mdc": {
-          "path": "python/linting.mdc",
-          "gist_name": "rules_python_linting.mdc",
-          "size": 1234,
-          "md5": "a1b2c3d4e5f6g7h8i9j0"
-        },
-        "testing.mdc": {
-          "path": "python/testing.mdc",
-          "gist_name": "rules_python_testing.mdc",
-          "size": 2345,
-          "md5": "b2c3d4e5f6g7h8i9j0a1"
-        }
+    "python": {
+      "linting.mdc": {
+        "path": "python/linting.mdc",
+        "gist_name": "python_linting.mdc",
+        "size": 1234,
+        "md5": "a1b2c3d4e5f6g7h8i9j0"
       },
-      "database": {
-        "postgres.mdc": {
-          "path": "database/postgres.mdc",
-          "gist_name": "rules_database_postgres.mdc",
-          "size": 3456,
-          "md5": "c3d4e5f6g7h8i9j0a1b2"
-        }
+      "testing.mdc": {
+        "path": "python/testing.mdc",
+        "gist_name": "python_testing.mdc",
+        "size": 2345,
+        "md5": "b2c3d4e5f6g7h8i9j0a1"
+      }
+    },
+    "database": {
+      "postgres.mdc": {
+        "path": "database/postgres.mdc",
+        "gist_name": "database_postgres.mdc",
+        "size": 3456,
+        "md5": "c3d4e5f6g7h8i9j0a1b2"
       }
     }
   }
 }
 ```
+
+> **중요**: 
+> - rulesctl은 현재 실행 경로에 `.cursor/rules/**/*.mdc` 구조가 있어야만 사용할 수 있습니다.
+> - 규칙 세트 이름은 따옴표로 감싸서 지정합니다.
+> - Gist에 업로드될 때 파일 이름은 디렉토리 구조를 반영하여 변환됩니다. (예: `python/linting.mdc` → `python_linting.mdc`)
 
 ## NPM 배포
 

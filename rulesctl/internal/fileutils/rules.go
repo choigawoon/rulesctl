@@ -50,6 +50,11 @@ func ListLocalRules() (map[string]string, error) {
 		return nil, err
 	}
 
+	// .cursor/rules 디렉토리가 존재하는지 확인
+	if _, err := os.Stat(rulesDir); os.IsNotExist(err) {
+		return nil, fmt.Errorf(".cursor/rules 디렉토리가 존재하지 않습니다. 'rulesctl init' 명령어로 초기화하거나 직접 디렉토리를 생성해주세요")
+	}
+
 	files := make(map[string]string)
 	err = filepath.Walk(rulesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -75,6 +80,11 @@ func ListLocalRules() (map[string]string, error) {
 
 	if err != nil {
 		return nil, fmt.Errorf("규칙 파일 탐색 실패: %w", err)
+	}
+
+	// 파일이 없는 경우
+	if len(files) == 0 {
+		return nil, fmt.Errorf(".cursor/rules 디렉토리에 .mdc 파일이 없습니다. 규칙 파일을 추가해주세요")
 	}
 
 	return files, nil
