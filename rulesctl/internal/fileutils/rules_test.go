@@ -124,4 +124,131 @@ func TestFileUtils(t *testing.T) {
 			t.Errorf("파일이 삭제되지 않음: %s", fullPath)
 		}
 	})
+
+	// 실제 환경 테스트
+	t.Run("실제 환경 테스트", func(t *testing.T) {
+		// 1. 실제 .cursor/rules 디렉토리 구조 테스트
+		t.Run("디렉토리 구조", func(t *testing.T) {
+			// 실제 디렉토리 구조 생성
+			structure := map[string]string{
+				"python/linting.mdc":    "Python 린팅 규칙",
+				"python/testing.mdc":    "Python 테스트 규칙",
+				"database/postgres.mdc": "PostgreSQL 규칙",
+			}
+
+			for path, content := range structure {
+				err := SaveRuleFile(path, []byte(content))
+				if err != nil {
+					t.Errorf("디렉토리 구조 생성 실패 %s: %v", path, err)
+				}
+			}
+
+			// 디렉토리 구조 확인
+			rules, err := ListLocalRules()
+			if err != nil {
+				t.Errorf("디렉토리 구조 확인 실패: %v", err)
+			}
+
+			for path := range structure {
+				if _, exists := rules[path]; !exists {
+					t.Errorf("예상된 파일이 없음: %s", path)
+				}
+			}
+		})
+
+		// 2. 권한 테스트
+		t.Run("파일 권한", func(t *testing.T) {
+			// 읽기 전용 파일 생성
+			path := "readonly.mdc"
+			err := SaveRuleFile(path, []byte("readonly content"))
+			if err != nil {
+				t.Errorf("읽기 전용 파일 생성 실패: %v", err)
+			}
+
+			// 파일 권한 변경
+			rulesDir, _ := GetRulesDirPath()
+			fullPath := filepath.Join(rulesDir, path)
+			err = os.Chmod(fullPath, 0444) // 읽기 전용
+			if err != nil {
+				t.Errorf("파일 권한 변경 실패: %v", err)
+			}
+
+			// 읽기 시도
+			_, err = os.ReadFile(fullPath)
+			if err != nil {
+				t.Errorf("읽기 전용 파일 읽기 실패: %v", err)
+			}
+
+			// 쓰기 시도 (실패해야 함)
+			err = os.WriteFile(fullPath, []byte("new content"), 0644)
+			if err == nil {
+				t.Errorf("읽기 전용 파일에 쓰기가 성공했음 (실패해야 함)")
+			}
+		})
+
+		// 3. 경로 처리 테스트
+		t.Run("경로 처리", func(t *testing.T) {
+			// 상대 경로 테스트
+			relPath := "path/test.mdc"
+			err := SaveRuleFile(relPath, []byte("relative path test"))
+			if err != nil {
+				t.Errorf("상대 경로 파일 생성 실패: %v", err)
+			}
+
+			// 절대 경로 테스트
+			rulesDir, _ := GetRulesDirPath()
+			absPath := filepath.Join(rulesDir, "abs/test.mdc")
+			err = os.MkdirAll(filepath.Dir(absPath), 0755)
+			if err != nil {
+				t.Errorf("절대 경로 디렉토리 생성 실패: %v", err)
+			}
+			err = os.WriteFile(absPath, []byte("absolute path test"), 0644)
+			if err != nil {
+				t.Errorf("절대 경로 파일 생성 실패: %v", err)
+			}
+
+			// 경로 정규화 테스트
+			normalizedPath := filepath.Clean("path/../path/test.mdc")
+			if normalizedPath != "path/test.mdc" {
+				t.Errorf("경로 정규화 실패: %s", normalizedPath)
+			}
+		})
+
+		// 4. 심볼릭 링크 테스트
+		t.Run("심볼릭 링크", func(t *testing.T) {
+			// 원본 파일 생성
+			originalPath := "original.mdc"
+			err := SaveRuleFile(originalPath, []byte("original content"))
+			if err != nil {
+				t.Errorf("원본 파일 생성 실패: %v", err)
+			}
+
+			// 심볼릭 링크 생성
+			rulesDir, _ := GetRulesDirPath()
+			originalFullPath := filepath.Join(rulesDir, originalPath)
+			linkPath := filepath.Join(rulesDir, "link.mdc")
+			err = os.Symlink(originalFullPath, linkPath)
+			if err != nil {
+				t.Errorf("심볼릭 링크 생성 실패: %v", err)
+			}
+
+			// 심볼릭 링크를 통한 파일 접근
+			content, err := os.ReadFile(linkPath)
+			if err != nil {
+				t.Errorf("심볼릭 링크를 통한 파일 읽기 실패: %v", err)
+			}
+			if string(content) != "original content" {
+				t.Errorf("심볼릭 링크 내용 불일치")
+			}
+
+			// 심볼릭 링크 경로 처리
+			linkInfo, err := os.Lstat(linkPath)
+			if err != nil {
+				t.Errorf("심볼릭 링크 정보 조회 실패: %v", err)
+			}
+			if linkInfo.Mode()&os.ModeSymlink == 0 {
+				t.Errorf("심볼릭 링크가 아님")
+			}
+		})
+	})
 } 
