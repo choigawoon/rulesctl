@@ -89,4 +89,7 @@ rulesctl delete "test"
 
 3. NPM 배포
 - `package.json`의 버전이 올바른지 확인
-- 배포 전 로컬에서 반드시 테스트 
+- 배포 전 로컬에서 반드시 테스트
+- GitHub Release 배포 후 약 5-10분 대기 후 npm 배포 진행
+  - GitHub Release API는 캐시되어 있어 즉시 반영되지 않을 수 있음
+  - 충분한 시간을 두고 배포해야 새 버전이 정상적으로 설치됨 

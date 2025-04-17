@@ -218,10 +218,14 @@
      - 원인: 
        1. goreleaser가 빌드한 바이너리와 npm 패키지의 바이너리가 다름
        2. npm/rulesctl.js의 VERSION과 실제 바이너리 버전이 불일치
+       3. GitHub Release API 캐시 문제
+          - GitHub release 배포 후 일정 시간이 지나야 새 버전이 정상적으로 다운로드됨
+          - API 응답이 캐시되어 있어 즉시 반영되지 않는 것으로 추정
      - 해결 방안 검토:
        1. npm pack 전에 goreleaser 빌드 바이너리를 npm/bin에 복사
        2. 로컬 설치 시에도 GitHub releases에서 바이너리 다운로드
        3. goreleaser post hooks 수정 검토
+       4. GitHub Release 배포 후 일정 시간(약 5-10분) 대기 후 npm 배포 진행
 
 ### 다음 작업
 1. 버전 관리 이슈 해결
