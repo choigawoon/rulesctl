@@ -59,7 +59,7 @@ var uploadCmd = &cobra.Command{
 			}
 
 			// 메타데이터에 파일 추가
-			if err := metadata.AddFile(path); err != nil {
+			if err := metadata.AddFile(fullPath); err != nil {
 				return fmt.Errorf("메타데이터 추가 실패 %s: %v", path, err)
 			}
 

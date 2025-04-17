@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -58,22 +59,39 @@ func convertToGistName(path string) string {
 }
 
 func (m *Metadata) AddFile(path string) error {
-	file, err := os.Open(path)
+	// 이 함수에서는 path가 상대 경로이며, 실제 파일은 .cursor/rules 디렉토리 내에 있습니다.
+	// 따라서 파일을 열기 전에 절대 경로를 구성해야 합니다.
+	
+	// 먼저 path가 이미 절대 경로인지 확인
+	var fullPath string
+	if filepath.IsAbs(path) {
+		fullPath = path
+	} else {
+		// rulesDir 경로 가져오기
+		dir, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
+		}
+		fullPath = filepath.Join(dir, ".cursor/rules", path)
+	}
+
+	// 파일 열기
+	file, err := os.Open(fullPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("파일 열기 실패 %s: %w", path, err)
 	}
 	defer file.Close()
 
 	// 파일 크기 확인
 	info, err := file.Stat()
 	if err != nil {
-		return err
+		return fmt.Errorf("파일 정보 조회 실패 %s: %w", path, err)
 	}
 
 	// MD5 해시 계산
 	hash := md5.New()
 	if _, err := io.Copy(hash, file); err != nil {
-		return err
+		return fmt.Errorf("해시 계산 실패 %s: %w", path, err)
 	}
 
 	// Gist 파일 이름 생성
@@ -118,9 +136,19 @@ func (m *Metadata) ToJSON() ([]byte, error) {
 
 // GetGistName은 원본 파일 경로에 대응하는 Gist 파일 이름을 반환합니다.
 func (m *Metadata) GetGistName(path string) string {
+	// 전체 경로와 상대 경로 모두 처리
 	for _, file := range m.Files {
+		// 전체 경로와 일치하는지 확인
 		if file.Path == path {
 			return file.GistName
+		}
+		
+		// 상대 경로와 일치하는지 확인
+		if filepath.Base(file.Path) == filepath.Base(path) {
+			dir := filepath.Dir(path)
+			if dir != "." && strings.HasSuffix(filepath.Dir(file.Path), dir) {
+				return file.GistName
+			}
 		}
 	}
 	return convertToGistName(path)

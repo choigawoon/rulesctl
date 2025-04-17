@@ -29,3 +29,6 @@ Thumbs.db
 
 # Environment files
 .env.local 
+
+# 빌드결과 테스트할수있으니까
+.cursor/rules/
