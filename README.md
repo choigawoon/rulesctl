@@ -38,8 +38,9 @@ rulesctl auth
 # 도움말 보기
 rulesctl --help
 
-# upload, download를 테스트할 샘플 규칙 파일 생성
+# 규칙 디렉토리 생성
 rulesctl init
+rulesctl init --sample  # 예제 규칙 파일도 함께 생성
 
 # 규칙 목록 보기 (최근 1달 이내)
 rulesctl list
@@ -62,10 +63,13 @@ rulesctl auth
 # 프롬프트에 Personal Access Token 입력
 ```
 
-기본 규칙 파일 생성하기:
+규칙 디렉토리 생성하기:
 ```bash
-# .cursor/rules 디렉토리와 hello.mdc 파일 생성
+# .cursor/rules 디렉토리 생성
 rulesctl init
+
+# 예제와 함께 시작하기
+rulesctl init --sample
 ```
 
 규칙 세트 업로드하기:

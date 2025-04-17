@@ -10,10 +10,13 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "기본 규칙 파일 생성",
-	Long: `현재 디렉토리에 .cursor/rules 디렉토리와 기본 규칙 파일을 생성합니다.
+	Short: "기본 규칙 디렉토리 생성",
+	Long: `현재 디렉토리에 .cursor/rules 디렉토리를 생성합니다.
+--sample 플래그를 사용하면 예제 규칙 파일도 함께 생성됩니다.
+
 생성되는 파일:
-- .cursor/rules/hello.mdc: 기본 인사말 규칙`,
+- .cursor/rules/                  : 규칙 파일 디렉토리
+- .cursor/rules/hello.mdc         : (--sample 사용 시) 기본 인사말 규칙`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 현재 디렉토리 확인
 		workDir, err := os.Getwd()
@@ -25,6 +28,14 @@ var initCmd = &cobra.Command{
 		rulesDir := filepath.Join(workDir, ".cursor", "rules")
 		if err := os.MkdirAll(rulesDir, 0755); err != nil {
 			return fmt.Errorf(".cursor/rules 디렉토리 생성 실패: %w", err)
+		}
+
+		fmt.Printf(".cursor/rules 디렉토리가 생성되었습니다: %s\n", rulesDir)
+
+		// --sample 플래그가 있을 때만 예제 파일 생성
+		sample, _ := cmd.Flags().GetBool("sample")
+		if !sample {
+			return nil
 		}
 
 		// hello.mdc 파일 생성
@@ -63,7 +74,7 @@ Assistant: hello, rulesctl
 			return fmt.Errorf("hello.mdc 파일 생성 실패: %w", err)
 		}
 
-		fmt.Println("기본 규칙 파일이 생성되었습니다:")
+		fmt.Println("예제 규칙 파일이 생성되었습니다:")
 		fmt.Printf("- %s\n", helloPath)
 		return nil
 	},
@@ -71,4 +82,5 @@ Assistant: hello, rulesctl
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+	initCmd.Flags().Bool("sample", false, "예제 규칙 파일 생성")
 } 
