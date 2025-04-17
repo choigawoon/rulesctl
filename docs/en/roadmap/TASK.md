@@ -102,10 +102,11 @@ This document breaks down each task phase to be completable within **1 hour**. T
 ## 4. User Experience Improvements (3 hours)
 
 ### 4-1. Error Handling and Logging (1 hour)
-- [ ] Implement consistent error handling mechanism
-- [ ] Implement logging system
-- [ ] User-friendly error messages
-- [ ] Implement debug mode
+- [x] Implement consistent error handling mechanism
+- [x] Implement logging system
+- [x] User-friendly error messages
+- [x] Implement debug mode
+- [x] Translate all error messages to English for global distribution
 
 ### 4-2. Progress Display and Prompts (1 hour)
 - [ ] Progress display (progress bar, etc.)
@@ -157,11 +158,11 @@ This document breaks down each task phase to be completable within **1 hour**. T
 - [x] Add test environment setup documentation
 
 ### 6-3. Document Internationalization (2 hours)
-- [ ] Restructure documentation directory
-- [ ] Set English version as default
-- [ ] Create Korean version documents (_ko.md)
-- [ ] Update cross-reference links between documents
-- [ ] Write multilingual document management guidelines
+- [x] Restructure documentation directory
+- [x] Set English version as default
+- [x] Create Korean version documents (_ko.md)
+- [x] Update cross-reference links between documents
+- [x] Write multilingual document management guidelines
 
 ### 6-4. Testing and Final Check (1 hour)
 - [ ] Complete feature integration testing
@@ -202,6 +203,15 @@ This document breaks down each task phase to be completable within **1 hour**. T
        2. Download binaries from GitHub releases even for local installation
        3. Review goreleaser post hooks modification
        4. Wait for a period (about 5-10 minutes) after GitHub Release deployment before proceeding with npm deployment
+
+### Internationalization and Localization
+1. Message Translation
+   - [x] Translate all CLI messages to English
+   - [x] Update client.go messages
+   - [x] Update list.go messages
+   - [x] Update download.go messages
+   - [ ] Review and update remaining files for any Korean messages
+   - [ ] Implement i18n system for future multi-language support
 
 ### Next Steps
 1. Resolve Version Management Issue
