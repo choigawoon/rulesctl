@@ -11,36 +11,36 @@ import (
 
 var authCmd = &cobra.Command{
 	Use:   "auth",
-	Short: "GitHub Personal Access Token 설정",
-	Long: `GitHub Personal Access Token을 설정합니다.
-이 토큰은 Gist API에 접근하는 데 사용됩니다.
+	Short: "Set GitHub Personal Access Token",
+	Long: `Set GitHub Personal Access Token.
+This token is used to access the Gist API.
 
-토큰은 다음 권한이 필요합니다:
-- Gist (read/write) 권한
-- repo 권한 (규칙 파일 목록 접근용)
+Required permissions:
+- Gist (read/write) permission
+- repo permission (for accessing rule file list)
 
-토큰은 ~/.rulesctl/config.json 파일에 안전하게 저장됩니다.`,
+The token is securely stored in ~/.rulesctl/config.json`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		token, _ := cmd.Flags().GetString("token")
 		if token == "" {
-			fmt.Print("GitHub Personal Access Token을 입력하세요: ")
+			fmt.Print("Enter GitHub Personal Access Token: ")
 			tokenBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
-			fmt.Println() // 줄바꿈을 위해 추가
+			fmt.Println() // Add newline
 			if err != nil {
-				return fmt.Errorf("토큰 읽기 실패: %w", err)
+				return fmt.Errorf("failed to read token: %w", err)
 			}
 			token = string(tokenBytes)
 		}
 
 		if token == "" {
-			return fmt.Errorf("토큰이 입력되지 않았습니다")
+			return fmt.Errorf("token not provided")
 		}
 
 		if err := config.SaveToken(token); err != nil {
-			return fmt.Errorf("토큰을 저장할 수 없습니다: %w", err)
+			return fmt.Errorf("failed to save token: %w", err)
 		}
 
-		fmt.Println("토큰이 성공적으로 저장되었습니다.")
+		fmt.Println("Token saved successfully.")
 		return nil
 	},
 }

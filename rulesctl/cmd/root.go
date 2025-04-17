@@ -8,20 +8,20 @@ import (
 )
 
 var (
-	// 전역 플래그
+	// Global flags
 	verbose bool
 	force   bool
 )
 
-// rootCmd는 기본 명령어를 나타냅니다
+// rootCmd represents the base command
 var rootCmd = &cobra.Command{
 	Use:   "rulesctl",
-	Short: "Cursor Rules 관리 CLI 도구",
-	Long: `rulesctl은 Cursor Rules를 효율적으로 관리하기 위한 CLI 도구입니다.
-GitHub Gist를 통해 규칙 세트를 저장하고 공유할 수 있습니다.`,
+	Short: "CLI tool for managing Cursor Rules",
+	Long: `rulesctl is a CLI tool for efficiently managing Cursor Rules.
+You can store and share rule sets through GitHub Gist.`,
 }
 
-// Execute는 root 명령어를 실행합니다
+// Execute executes the root command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -30,7 +30,7 @@ func Execute() {
 }
 
 func init() {
-	// 전역 플래그 설정
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "상세 로깅 활성화")
-	rootCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "충돌 시 강제 덮어쓰기")
+	// Set global flags
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
+	rootCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "Force overwrite on conflicts")
 } 

@@ -9,12 +9,12 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "rulesctl 버전 정보 출력",
+	Short: "Display rulesctl version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("rulesctl 버전: %s\n", version.Version)
+		fmt.Printf("rulesctl version: %s\n", version.Version)
 		if verbose {
-			fmt.Printf("빌드 시간: %s\n", version.BuildTime)
-			fmt.Printf("Git 커밋: %s\n", version.GitCommit)
+			fmt.Printf("Build time: %s\n", version.BuildTime)
+			fmt.Printf("Git commit: %s\n", version.GitCommit)
 		}
 	},
 }

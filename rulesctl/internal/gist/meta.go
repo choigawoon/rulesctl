@@ -32,7 +32,7 @@ type Metadata struct {
 func NewMetadata() *Metadata {
 	return &Metadata{
 		SchemaVersion: "1.0.0",
-		CLIVersion:    "0.1.0", // TODO: 버전 관리
+		CLIVersion:    "0.1.3", // TODO: 버전 관리
 		UpdatedAt:     time.Now(),
 		Structure:     make(DirectoryStructure),
 		Files:         make([]FileMetadata, 0),
@@ -70,48 +70,48 @@ func convertToGistName(path string) string {
 }
 
 func (m *Metadata) AddFile(path string) error {
-	// 먼저 path가 이미 절대 경로인지 확인
+	// Check if path is already absolute
 	var fullPath string
 	var relativePath string
 	
 	if filepath.IsAbs(path) {
 		fullPath = path
-		// 절대 경로에서 .cursor/rules/ 이후의 경로만 추출
+		// Extract path after .cursor/rules/
 		if idx := strings.Index(path, ".cursor/rules/"); idx != -1 {
 			relativePath = path[idx+len(".cursor/rules/"):]
 		} else {
-			return fmt.Errorf("경로가 .cursor/rules/ 디렉토리 내에 있지 않습니다: %s", path)
+			return fmt.Errorf("path is not within .cursor/rules/ directory: %s", path)
 		}
 	} else {
-		// 상대 경로인 경우
+		// For relative paths
 		dir, err := os.Getwd()
 		if err != nil {
-			return fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
+			return fmt.Errorf("failed to get working directory: %w", err)
 		}
 		fullPath = filepath.Join(dir, ".cursor/rules", path)
 		relativePath = path
 	}
 
-	// 파일 열기
+	// Open file
 	file, err := os.Open(fullPath)
 	if err != nil {
-		return fmt.Errorf("파일 열기 실패 %s: %w", path, err)
+		return fmt.Errorf("failed to open file %s: %w", path, err)
 	}
 	defer file.Close()
 
-	// 파일 크기 확인
+	// Get file info
 	info, err := file.Stat()
 	if err != nil {
-		return fmt.Errorf("파일 정보 조회 실패 %s: %w", path, err)
+		return fmt.Errorf("failed to get file info %s: %w", path, err)
 	}
 
-	// MD5 해시 계산
+	// Calculate MD5 hash
 	hash := md5.New()
 	if _, err := io.Copy(hash, file); err != nil {
-		return fmt.Errorf("해시 계산 실패 %s: %w", path, err)
+		return fmt.Errorf("failed to calculate hash %s: %w", path, err)
 	}
 
-	// Gist 파일 이름 생성 (상대 경로 사용)
+	// Generate Gist file name (using relative path)
 	gistName := convertToGistName(relativePath)
 
 	metadata := FileMetadata{
@@ -122,7 +122,7 @@ func (m *Metadata) AddFile(path string) error {
 	}
 	m.Files = append(m.Files, metadata)
 
-	// 디렉토리 구조 업데이트 (상대 경로 사용)
+	// Update directory structure (using relative path)
 	m.updateStructure(relativePath)
 
 	return nil
@@ -177,25 +177,25 @@ func (m *Metadata) GetGistName(path string) string {
 	return convertToGistName(relativePath)
 }
 
-// PreviewMetadata는 주어진 경로의 파일들에 대한 메타데이터를 생성합니다.
-// 실제로 파일을 업로드하지 않고 메타데이터만 미리 확인할 수 있습니다.
+// PreviewMetadata generates metadata for the given file paths.
+// This allows previewing metadata without actually uploading files.
 func PreviewMetadata(paths []string) (*Metadata, error) {
 	meta := NewMetadata()
 
 	for _, path := range paths {
 		if err := meta.AddFile(path); err != nil {
-			return nil, fmt.Errorf("메타데이터 생성 실패 (%s): %w", path, err)
+			return nil, fmt.Errorf("failed to generate metadata (%s): %w", path, err)
 		}
 	}
 
 	return meta, nil
 }
 
-// PreviewMetadataFromDir는 지정된 디렉토리에서 .mdc 파일들을 찾아 메타데이터를 생성합니다.
+// PreviewMetadataFromDir finds .mdc files in the specified directory and generates metadata.
 func PreviewMetadataFromDir(dir string) (*Metadata, error) {
 	var paths []string
 
-	// .mdc 파일 찾기
+	// Find .mdc files
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -207,27 +207,27 @@ func PreviewMetadataFromDir(dir string) (*Metadata, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("디렉토리 탐색 실패: %w", err)
+		return nil, fmt.Errorf("failed to scan directory: %w", err)
 	}
 
 	return PreviewMetadata(paths)
 }
 
-// PreviewMetadataFromWorkingDir는 현재 작업 디렉토리의 .cursor/rules/ 경로에서
-// 메타데이터를 생성하고 meta.json 형식으로 반환합니다.
+// PreviewMetadataFromWorkingDir generates metadata from the current working directory's .cursor/rules/ path
+// and returns it in meta.json format.
 func PreviewMetadataFromWorkingDir() (*Metadata, error) {
-	// 현재 작업 디렉토리 확인
+	// Check current working directory
 	workDir, err := os.Getwd()
 	if err != nil {
-		return nil, fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
+		return nil, fmt.Errorf("failed to get working directory: %w", err)
 	}
 
-	// .cursor/rules 경로 생성
+	// Create .cursor/rules path
 	rulesDir := filepath.Join(workDir, ".cursor", "rules")
 
-	// 디렉토리 존재 여부 확인
+	// Check if directory exists
 	if _, err := os.Stat(rulesDir); os.IsNotExist(err) {
-		return nil, fmt.Errorf(".cursor/rules 디렉토리를 찾을 수 없습니다: %s", rulesDir)
+		return nil, fmt.Errorf(".cursor/rules directory not found: %s", rulesDir)
 	}
 
 	return PreviewMetadataFromDir(rulesDir)

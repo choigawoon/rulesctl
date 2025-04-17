@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-// Config는 rulesctl의 설정을 나타냅니다
+// Config represents rulesctl configuration
 type Config struct {
 	Token    string `json:"token"`
 	LastUsed string `json:"last_used"`
@@ -19,14 +19,14 @@ var (
 )
 
 func init() {
-	// 환경 변수로 설정 디렉토리 오버라이드 가능
+	// Config directory can be overridden by environment variable
 	if envDir := os.Getenv("RULESCTL_CONFIG_DIR"); envDir != "" {
 		configDir = envDir
 	} else {
-		// os.UserHomeDir()를 사용하여 홈 디렉토리 찾기
+		// Use os.UserHomeDir() to find home directory
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Printf("홈 디렉토리를 찾을 수 없습니다: %v\n", err)
+			fmt.Printf("failed to find home directory: %v\n", err)
 			os.Exit(1)
 		}
 		configDir = filepath.Join(homeDir, ".rulesctl")
@@ -35,34 +35,34 @@ func init() {
 	configFile = filepath.Join(configDir, "config.json")
 	
 	if err := os.MkdirAll(configDir, 0700); err != nil {
-		fmt.Printf("설정 디렉토리를 생성할 수 없습니다: %v\n", err)
+		fmt.Printf("failed to create config directory: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-// GetConfigDir는 설정 디렉토리의 경로를 반환합니다
+// GetConfigDir returns the path of the config directory
 func GetConfigDir() (string, error) {
 	return configDir, nil
 }
 
-// getConfigPath는 설정 파일의 경로를 반환합니다
+// getConfigPath returns the path of the config file
 func getConfigPath() (string, error) {
 	return configFile, nil
 }
 
-// EnsureConfigDir는 설정 디렉토리가 존재하는지 확인하고, 없으면 생성합니다
+// EnsureConfigDir checks if the config directory exists and creates it if not
 func EnsureConfigDir() error {
 	return os.MkdirAll(configDir, 0700)
 }
 
-// LoadConfig는 설정을 로드합니다
+// LoadConfig loads configuration
 func LoadConfig() (*Config, error) {
-	// 1. 환경 변수에서 토큰 확인
+	// 1. Check token in environment variable
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
 		return &Config{Token: token}, nil
 	}
 
-	// 2. 설정 파일에서 토큰 확인
+	// 2. Check token in config file
 	configPath, err := getConfigPath()
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func LoadConfig() (*Config, error) {
 	return &config, nil
 }
 
-// SaveConfig는 설정을 파일에 저장합니다
+// SaveConfig saves configuration to file
 func SaveConfig(config *Config) error {
 	if err := EnsureConfigDir(); err != nil {
 		return err
@@ -92,22 +92,22 @@ func SaveConfig(config *Config) error {
 
 	data, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
-		return fmt.Errorf("설정을 JSON으로 변환할 수 없습니다: %w", err)
+		return fmt.Errorf("failed to convert config to JSON: %w", err)
 	}
 
 	if err := os.WriteFile(configFile, data, 0600); err != nil {
-		return fmt.Errorf("설정 파일을 저장할 수 없습니다: %w", err)
+		return fmt.Errorf("failed to save config file: %w", err)
 	}
 
-	// 디버그 로그
-	fmt.Printf("설정 파일 저장 완료: %s\n", configFile)
+	// Debug log
+	fmt.Printf("Config file saved: %s\n", configFile)
 	return nil
 }
 
-// SaveToken은 GitHub 토큰을 저장합니다
+// SaveToken saves GitHub token
 func SaveToken(token string) error {
 	if token == "" {
-		return fmt.Errorf("토큰이 비어있습니다")
+		return fmt.Errorf("token is empty")
 	}
 
 	config, err := LoadConfig()

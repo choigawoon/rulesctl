@@ -10,71 +10,71 @@ import (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "기본 규칙 디렉토리 생성",
-	Long: `현재 디렉토리에 .cursor/rules 디렉토리를 생성합니다.
---sample 플래그를 사용하면 예제 규칙 파일도 함께 생성됩니다.
+	Short: "Create default rules directory",
+	Long: `Create .cursor/rules directory in the current directory.
+Use --sample flag to create example rule files.
 
-생성되는 파일:
-- .cursor/rules/                  : 규칙 파일 디렉토리
-- .cursor/rules/hello.mdc         : (--sample 사용 시) 기본 인사말 규칙`,
+Created files:
+- .cursor/rules/                  : Rules directory
+- .cursor/rules/hello.mdc         : (with --sample) Basic greeting rule`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// 현재 디렉토리 확인
+		// Check current directory
 		workDir, err := os.Getwd()
 		if err != nil {
-			return fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
+			return fmt.Errorf("failed to get working directory: %w", err)
 		}
 
-		// .cursor/rules 디렉토리 생성
+		// Create .cursor/rules directory
 		rulesDir := filepath.Join(workDir, ".cursor", "rules")
 		if err := os.MkdirAll(rulesDir, 0755); err != nil {
-			return fmt.Errorf(".cursor/rules 디렉토리 생성 실패: %w", err)
+			return fmt.Errorf("failed to create .cursor/rules directory: %w", err)
 		}
 
-		fmt.Printf(".cursor/rules 디렉토리가 생성되었습니다: %s\n", rulesDir)
+		fmt.Printf(".cursor/rules directory created: %s\n", rulesDir)
 
-		// --sample 플래그가 있을 때만 예제 파일 생성
+		// Create example files only if --sample flag is used
 		sample, _ := cmd.Flags().GetBool("sample")
 		if !sample {
 			return nil
 		}
 
-		// hello.mdc 파일 생성
+		// Create hello.mdc file
 		helloPath := filepath.Join(rulesDir, "hello.mdc")
 		helloContent := `# Hello Rule
 
-이 규칙은 모든 대화에서 "hello, rulesctl"로 시작하도록 합니다.
+This rule makes every conversation start with "hello, rulesctl".
 
 <instructions>
-1. 모든 대화의 시작에 "hello, rulesctl"을 출력합니다.
-2. 이 인사말은 다른 응답 내용보다 먼저 나와야 합니다.
-3. 인사말 다음에는 빈 줄을 추가하여 본문과 구분합니다.
+1. Output "hello, rulesctl" at the start of every conversation.
+2. This greeting must come before any other response content.
+3. Add a blank line after the greeting to separate it from the main content.
 </instructions>
 
 <examples>
-예시 1:
-User: 파일을 생성해줘
+Example 1:
+User: Create a file
 Assistant: hello, rulesctl
 
-네, 어떤 파일을 생성하시겠습니까?
+What kind of file would you like to create?
 
-예시 2:
-User: 코드를 검토해줘
+Example 2:
+User: Review my code
 Assistant: hello, rulesctl
 
-코드를 검토해드리겠습니다.
+I'll review your code.
 </examples>
 
 <rules>
-- 모든 응답은 "hello, rulesctl"로 시작해야 합니다.
-- 인사말과 본문 사이에 빈 줄을 넣어야 합니다.
-- 인사말은 다른 서식 없이 일반 텍스트로 출력합니다.
+- Every response must start with "hello, rulesctl"
+- There must be a blank line between the greeting and the main content
+- The greeting should be output as plain text without any formatting
 </rules>`
 
 		if err := os.WriteFile(helloPath, []byte(helloContent), 0644); err != nil {
-			return fmt.Errorf("hello.mdc 파일 생성 실패: %w", err)
+			return fmt.Errorf("failed to create hello.mdc file: %w", err)
 		}
 
-		fmt.Println("예제 규칙 파일이 생성되었습니다:")
+		fmt.Println("Example rule files created:")
 		fmt.Printf("- %s\n", helloPath)
 		return nil
 	},
@@ -82,5 +82,5 @@ Assistant: hello, rulesctl
 
 func init() {
 	rootCmd.AddCommand(initCmd)
-	initCmd.Flags().Bool("sample", false, "예제 규칙 파일 생성")
+	initCmd.Flags().Bool("sample", false, "Create example rule files")
 } 

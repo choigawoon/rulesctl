@@ -13,7 +13,7 @@ var baseURL = "https://api.github.com"
 
 const MetaFileName = ".rulesctl.meta.json"
 
-// Gist는 GitHub Gist의 정보를 나타냅니다
+// Gist represents GitHub Gist information
 type Gist struct {
 	ID          string    `json:"id"`
 	Description string    `json:"description"`
@@ -32,20 +32,20 @@ type Gist struct {
 		CommitID  string    `json:"commit_id"`
 		UpdatedAt time.Time `json:"updated_at"`
 	} `json:"history"`
-	RevisionNumber int // GitHub 웹 UI와 동일한 순번 (최신이 1)
+	RevisionNumber int // Same as GitHub web UI numbering (latest is 1)
 }
 
-// FetchUserGists는 사용자의 Gist를 가져옵니다
-// since가 지정된 경우 해당 시간 이후의 Gist만 가져옵니다
+// FetchUserGists fetches user's Gists
+// If since is specified, only fetches Gists after that time
 func FetchUserGists(since *time.Time) ([]Gist, error) {
-	// 설정에서 토큰 로드
+	// Load token from config
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		return nil, fmt.Errorf("설정을 로드할 수 없습니다: %w", err)
+		return nil, fmt.Errorf("failed to load configuration: %w", err)
 	}
 	
 	if cfg.Token == "" {
-		return nil, fmt.Errorf("GitHub 토큰이 설정되지 않았습니다")
+		return nil, fmt.Errorf("GitHub token not set")
 	}
 	
 	client := &http.Client{}
@@ -57,7 +57,7 @@ func FetchUserGists(since *time.Time) ([]Gist, error) {
 	
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("요청 생성 실패: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "token "+cfg.Token)
@@ -65,20 +65,20 @@ func FetchUserGists(since *time.Time) ([]Gist, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("API 요청 실패: %w", err)
+		return nil, fmt.Errorf("failed to make API request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API 요청 실패: %s", resp.Status)
+		return nil, fmt.Errorf("API request failed: %s", resp.Status)
 	}
 
 	var gists []Gist
 	if err := json.NewDecoder(resp.Body).Decode(&gists); err != nil {
-		return nil, fmt.Errorf("응답 파싱 실패: %w", err)
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	// .rulesctl.meta.json 파일이 있는 Gist만 필터링
+	// Filter Gists with .rulesctl.meta.json file
 	var rulesctlGists []Gist
 	for _, g := range gists {
 		if _, hasRulesctlMeta := g.Files[MetaFileName]; hasRulesctlMeta {
@@ -89,7 +89,7 @@ func FetchUserGists(since *time.Time) ([]Gist, error) {
 	return rulesctlGists, nil
 }
 
-// FetchGistWithHistory는 특정 Gist의 상세 정보와 히스토리를 가져옵니다
+// FetchGistWithHistory fetches detailed information and history of a specific Gist
 func FetchGistWithHistory(token, gistID string) (*Gist, error) {
 	url := fmt.Sprintf("%s/gists/%s", baseURL, gistID)
 	
@@ -108,7 +108,7 @@ func FetchGistWithHistory(token, gistID string) (*Gist, error) {
 	defer resp.Body.Close()
 	
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API 요청 실패: %s", resp.Status)
+		return nil, fmt.Errorf("API request failed: %s", resp.Status)
 	}
 	
 	var gist Gist
@@ -116,23 +116,23 @@ func FetchGistWithHistory(token, gistID string) (*Gist, error) {
 		return nil, err
 	}
 
-	// History 길이를 기준으로 RevisionNumber 설정
-	// 최신이 Rev 1이 되도록 함
+	// Set RevisionNumber based on History length
+	// Latest becomes Rev 1
 	gist.RevisionNumber = len(gist.History)
 	
 	return &gist, nil
 }
 
-// DeleteGist는 지정된 ID의 Gist를 삭제합니다.
+// DeleteGist deletes a Gist with the specified ID
 func DeleteGist(gistID string) error {
-	// 설정에서 토큰 로드
+	// Load token from config
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		return fmt.Errorf("설정을 로드할 수 없습니다: %w", err)
+		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 	
 	if cfg.Token == "" {
-		return fmt.Errorf("GitHub 토큰이 설정되지 않았습니다")
+		return fmt.Errorf("GitHub token not set")
 	}
 	
 	client := &http.Client{}
@@ -140,7 +140,7 @@ func DeleteGist(gistID string) error {
 	
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		return fmt.Errorf("요청 생성 실패: %w", err)
+		return fmt.Errorf("failed to create request: %w", err)
 	}
 	
 	req.Header.Set("Authorization", "token "+cfg.Token)
@@ -148,12 +148,12 @@ func DeleteGist(gistID string) error {
 	
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("API 요청 실패: %w", err)
+		return fmt.Errorf("failed to make API request: %w", err)
 	}
 	defer resp.Body.Close()
 	
 	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("Gist 삭제 실패: %s", resp.Status)
+		return fmt.Errorf("failed to delete Gist: %s", resp.Status)
 	}
 	
 	return nil

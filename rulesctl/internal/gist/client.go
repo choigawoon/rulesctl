@@ -33,10 +33,10 @@ func NewClient() (*Client, error) {
 }
 
 func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bool) (string, error) {
-	// 기존 Gist 검색
+	// Search for existing Gist
 	gists, _, err := c.client.Gists.List(c.ctx, "", &github.GistListOptions{})
 	if err != nil {
-		return "", fmt.Errorf("Gist 목록 조회 실패: %v", err)
+		return "", fmt.Errorf("failed to list gists: %v", err)
 	}
 
 	var existingGist *github.Gist
@@ -47,7 +47,7 @@ func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bo
 		}
 	}
 
-	// Gist 파일 생성
+	// Create Gist files
 	gistFiles := make(map[github.GistFilename]github.GistFile)
 	for path, file := range files {
 		filename := github.GistFilename(path)
@@ -59,18 +59,18 @@ func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bo
 
 	if existingGist != nil {
 		if !force {
-			return "", fmt.Errorf("이미 존재하는 Gist입니다. --force 옵션을 사용하여 강제 업데이트하세요")
+			return "", fmt.Errorf("Gist already exists. Use --force option to force update")
 		}
-		// Gist 업데이트
+		// Update Gist
 		existingGist.Files = gistFiles
 		updatedGist, _, err := c.client.Gists.Edit(c.ctx, *existingGist.ID, existingGist)
 		if err != nil {
-			return "", fmt.Errorf("Gist 업데이트 실패: %v", err)
+			return "", fmt.Errorf("failed to update Gist: %v", err)
 		}
 		return *updatedGist.ID, nil
 	}
 
-	// 새 Gist 생성
+	// Create new Gist
 	description := name
 	public := false
 	newGist := &github.Gist{
@@ -81,13 +81,13 @@ func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bo
 
 	createdGist, _, err := c.client.Gists.Create(c.ctx, newGist)
 	if err != nil {
-		return "", fmt.Errorf("Gist 생성 실패: %v", err)
+		return "", fmt.Errorf("failed to create Gist: %v", err)
 	}
 
 	return *createdGist.ID, nil
 }
 
-// FetchUserGists는 사용자의 모든 Gist를 가져옵니다
+// FetchUserGists fetches all Gists of the user
 func (c *Client) FetchUserGists() ([]struct {
 	ID          string
 	Description string
@@ -95,7 +95,7 @@ func (c *Client) FetchUserGists() ([]struct {
 }, error) {
 	gists, _, err := c.client.Gists.List(c.ctx, "", &github.GistListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("Gist 목록 조회 실패: %v", err)
+		return nil, fmt.Errorf("failed to fetch Gist list: %v", err)
 	}
 
 	result := make([]struct {

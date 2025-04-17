@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	titleWidth = 25    // 제목 최대 너비
-	dateWidth  = 19    // 날짜 너비
-	idWidth    = 32    // Gist ID 너비
-	revWidth   = 8     // Revision 너비
+	titleWidth = 25    // Title max width
+	dateWidth  = 19    // Date width
+	idWidth    = 32    // Gist ID width
+	revWidth   = 8     // Revision width
 	separator  = "..."
 )
 
-// truncateString은 문자열을 지정된 너비로 자르고 필요한 경우 말줄임표를 추가합니다.
+// truncateString truncates a string to the specified width and adds ellipsis if needed
 func truncateString(s string, width int) string {
 	if utf8.RuneCountInString(s) <= width {
 		return s + strings.Repeat(" ", width-utf8.RuneCountInString(s))
@@ -31,49 +31,49 @@ func truncateString(s string, width int) string {
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "GIST에 저장된 규칙 목록 출력",
-	Long: `GIST에 저장된 모든 규칙 목록을 출력합니다.
-기본적으로 [제목] [최종수정시각] [Gist ID] 형식으로 출력됩니다.
---detail 플래그를 사용하면 revision 정보도 함께 표시됩니다.
+	Short: "List rules stored in GIST",
+	Long: `List all rules stored in GIST.
+By default, outputs in [Title] [Last Modified] [Gist ID] format.
+Use --detail flag to include revision information.
 
-사용 예시:
-  rulesctl list          # 기본 정보만 출력
-  rulesctl list --detail # revision 정보 포함하여 출력`,
+Examples:
+  rulesctl list          # Show basic information
+  rulesctl list --detail # Show with revision information`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := config.LoadConfig()
 		if err != nil {
-			return fmt.Errorf("설정을 로드할 수 없습니다: %w", err)
+			return fmt.Errorf("failed to load configuration: %w", err)
 		}
 
 		if config.Token == "" {
-			return fmt.Errorf("GitHub 토큰이 설정되지 않았습니다. 'rulesctl auth' 명령어로 토큰을 설정해주세요.")
+			return fmt.Errorf("GitHub token not set. Please run 'rulesctl auth' to set your token")
 		}
 
-		// 토큰 소스 표시
+		// Show token source
 		if os.Getenv("GITHUB_TOKEN") != "" {
-			fmt.Println("GitHub 토큰: 환경 변수에서 로드됨")
+			fmt.Println("GitHub Token: Loaded from environment variable")
 		} else {
-			fmt.Println("GitHub 토큰: 설정 파일에서 로드됨")
+			fmt.Println("GitHub Token: Loaded from config file")
 		}
 
-		// 최근 1달 이내의 Gist만 조회
+		// Only fetch Gists from the last month
 		since := time.Now().AddDate(0, -1, 0)
 		gists, err := gist.FetchUserGists(&since)
 		if err != nil {
-			return fmt.Errorf("Gist 목록 조회 실패: %w", err)
+			return fmt.Errorf("failed to fetch Gist list: %w", err)
 		}
 
-		// GIST를 최종 수정 시간 기준으로 정렬
+		// Sort Gists by last modified time
 		sort.Slice(gists, func(i, j int) bool {
 			return gists[i].UpdatedAt.After(gists[j].UpdatedAt)
 		})
 
-		// 상세 모드 여부 확인
+		// Check detail mode
 		detail, _ := cmd.Flags().GetBool("detail")
 
-		// 테이블 헤더 출력
-		titleHeader := truncateString("제목", titleWidth)
-		dateHeader := truncateString("최종 수정", dateWidth)
+		// Print table header
+		titleHeader := truncateString("Title", titleWidth)
+		dateHeader := truncateString("Last Modified", dateWidth)
 		idHeader := truncateString("Gist ID", idWidth)
 		
 		if detail {
@@ -85,11 +85,11 @@ var listCmd = &cobra.Command{
 			fmt.Println(strings.Repeat("-", titleWidth+dateWidth+idWidth+4))
 		}
 
-		// 각 GIST 정보 출력
+		// Print each Gist information
 		for _, g := range gists {
 			description := g.Description
 			if description == "" {
-				description = "(제목 없음)"
+				description = "(No title)"
 			}
 			
 			title := truncateString(description, titleWidth)
@@ -97,10 +97,10 @@ var listCmd = &cobra.Command{
 			id := truncateString(g.ID, idWidth)
 
 			if detail {
-				// 상세 정보와 히스토리 조회
+				// Fetch detailed information and history
 				gistDetail, err := gist.FetchGistWithHistory(config.Token, g.ID)
 				if err != nil {
-					continue // 히스토리 조회 실패 시 건너뛰기
+					continue // Skip if history fetch fails
 				}
 				rev := truncateString(fmt.Sprintf("%d", gistDetail.RevisionNumber), revWidth)
 				fmt.Printf("%s  %s  %s  %s\n", title, date, id, rev)
@@ -115,5 +115,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().Bool("detail", false, "revision 정보를 포함한 상세 정보 출력")
+	listCmd.Flags().Bool("detail", false, "Show detailed information including revision")
 } 

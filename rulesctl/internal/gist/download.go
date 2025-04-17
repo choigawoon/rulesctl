@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 )
 
-// FetchGist는 지정된 ID의 Gist를 가져옵니다.
+// FetchGist fetches a Gist with the specified ID.
 func FetchGist(token, gistID string) (*Gist, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/gists/%s", baseURL, gistID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("요청 생성 실패: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "token "+token)
@@ -25,21 +25,21 @@ func FetchGist(token, gistID string) (*Gist, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("API 요청 실패: %w", err)
+		return nil, fmt.Errorf("failed to make API request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("Gist를 찾을 수 없습니다: %s", gistID)
+		return nil, fmt.Errorf("Gist not found: %s", gistID)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API 요청 실패: %s", resp.Status)
+		return nil, fmt.Errorf("API request failed: %s", resp.Status)
 	}
 
 	var gist Gist
 	if err := json.NewDecoder(resp.Body).Decode(&gist); err != nil {
-		return nil, fmt.Errorf("응답 파싱 실패: %w", err)
+		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
 	return &gist, nil
@@ -49,7 +49,7 @@ func FetchGist(token, gistID string) (*Gist, error) {
 func ParseMetadataFromGist(content string) (*Metadata, error) {
 	var meta Metadata
 	if err := json.Unmarshal([]byte(content), &meta); err != nil {
-		return nil, fmt.Errorf("메타데이터 파싱 실패: %w", err)
+		return nil, fmt.Errorf("failed to parse metadata: %w", err)
 	}
 	return &meta, nil
 }
@@ -61,7 +61,7 @@ func CheckConflicts(meta *Metadata) ([]string, error) {
 	// 현재 작업 디렉토리 확인
 	workDir, err := os.Getwd()
 	if err != nil {
-		return nil, fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
+		return nil, fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	// 각 파일에 대해 충돌 검사
@@ -75,100 +75,100 @@ func CheckConflicts(meta *Metadata) ([]string, error) {
 	return conflicts, nil
 }
 
-// DownloadFiles는 Gist의 파일들을 로컬에 다운로드합니다.
+// DownloadFiles downloads files from a Gist to local.
 func DownloadFiles(token, gistID string, meta *Metadata, force bool) error {
-	// 현재 작업 디렉토리 확인
+	// Check current working directory
 	workDir, err := os.Getwd()
 	if err != nil {
-		return fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
-	// 임시 디렉토리 경로 설정
+	// Set temporary directory path
 	tmpDir := filepath.Join(workDir, ".rulesctl", "tmp", gistID)
 	rulesDir := filepath.Join(workDir, ".cursor", "rules")
 
-	// 임시 디렉토리가 이미 존재하면 제거
+	// Remove existing temporary directory if exists
 	if err := os.RemoveAll(tmpDir); err != nil {
-		return fmt.Errorf("기존 임시 디렉토리 제거 실패: %w", err)
+		return fmt.Errorf("failed to remove existing temporary directory: %w", err)
 	}
 
-	// 임시 디렉토리 생성
+	// Create temporary directory
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		return fmt.Errorf("임시 디렉토리 생성 실패: %w", err)
+		return fmt.Errorf("failed to create temporary directory: %w", err)
 	}
-	defer os.RemoveAll(tmpDir) // 작업 완료 후 임시 디렉토리 제거
+	defer os.RemoveAll(tmpDir) // Remove temporary directory after completion
 
-	// Gist 가져오기
+	// Fetch Gist
 	gist, err := FetchGist(token, gistID)
 	if err != nil {
 		return err
 	}
 
-	// 각 파일 다운로드 및 검증
+	// Download and verify each file
 	for _, file := range meta.Files {
-		// Gist에서 파일 찾기
+		// Find file in Gist
 		gistFile, exists := gist.Files[file.GistName]
 		if !exists {
-			return fmt.Errorf("Gist에서 파일을 찾을 수 없습니다: %s", file.GistName)
+			return fmt.Errorf("file not found in Gist: %s", file.GistName)
 		}
 
-		// 임시 디렉토리에 파일 다운로드
+		// Download file to temporary directory
 		tmpPath := filepath.Join(tmpDir, file.Path)
 		if err := os.MkdirAll(filepath.Dir(tmpPath), 0755); err != nil {
-			return fmt.Errorf("임시 디렉토리 생성 실패: %w", err)
+			return fmt.Errorf("failed to create temporary directory: %w", err)
 		}
 
 		if err := downloadFile(gistFile.RawURL, tmpPath); err != nil {
-			return fmt.Errorf("파일 다운로드 실패 (%s): %w", file.Path, err)
+			return fmt.Errorf("failed to download file (%s): %w", file.Path, err)
 		}
 
-		// MD5 해시 검증
+		// Verify MD5 hash
 		hash, err := calculateMD5(tmpPath)
 		if err != nil {
-			return fmt.Errorf("MD5 해시 계산 실패 (%s): %w", file.Path, err)
+			return fmt.Errorf("failed to calculate MD5 hash (%s): %w", file.Path, err)
 		}
 
 		if hash != file.MD5 {
-			return fmt.Errorf("MD5 해시 불일치 (%s): expected %s, got %s", file.Path, file.MD5, hash)
+			return fmt.Errorf("MD5 hash mismatch (%s): expected %s, got %s", file.Path, file.MD5, hash)
 		}
 	}
 
-	// 파일 충돌 검사
+	// Check for file conflicts
 	if !force {
 		conflicts, err := CheckConflicts(meta)
 		if err != nil {
-			return fmt.Errorf("충돌 검사 실패: %w", err)
+			return fmt.Errorf("failed to check conflicts: %w", err)
 		}
 		if len(conflicts) > 0 {
-			return fmt.Errorf("파일 충돌이 발생했습니다. --force 옵션을 사용하여 덮어쓸 수 있습니다")
+			return fmt.Errorf("file conflicts detected. Use --force option to overwrite")
 		}
 	}
 
-	// .cursor/rules 디렉토리 생성
+	// Create .cursor/rules directory
 	if err := os.MkdirAll(rulesDir, 0755); err != nil {
-		return fmt.Errorf(".cursor/rules 디렉토리 생성 실패: %w", err)
+		return fmt.Errorf("failed to create .cursor/rules directory: %w", err)
 	}
 
-	// 검증이 완료된 파일들을 최종 위치로 이동
+	// Move verified files to final location
 	for _, file := range meta.Files {
 		tmpPath := filepath.Join(tmpDir, file.Path)
 		finalPath := filepath.Join(rulesDir, file.Path)
 
-		// 대상 디렉토리 생성
+		// Create target directory
 		if err := os.MkdirAll(filepath.Dir(finalPath), 0755); err != nil {
-			return fmt.Errorf("디렉토리 생성 실패: %w", err)
+			return fmt.Errorf("failed to create directory: %w", err)
 		}
 
-		// 기존 파일이 있으면 제거 (force 옵션이 true일 때)
+		// Remove existing file if force option is true
 		if force {
 			if err := os.RemoveAll(finalPath); err != nil {
-				return fmt.Errorf("기존 파일 제거 실패 (%s): %w", file.Path, err)
+				return fmt.Errorf("failed to remove existing file (%s): %w", file.Path, err)
 			}
 		}
 
-		// 파일 이동
+		// Move file
 		if err := os.Rename(tmpPath, finalPath); err != nil {
-			return fmt.Errorf("파일 이동 실패 (%s): %w", file.Path, err)
+			return fmt.Errorf("failed to move file (%s): %w", file.Path, err)
 		}
 	}
 
@@ -200,7 +200,7 @@ func downloadFile(url, filepath string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("파일 다운로드 실패: %s", resp.Status)
+		return fmt.Errorf("failed to download file: %s", resp.Status)
 	}
 
 	out, err := os.Create(filepath)
