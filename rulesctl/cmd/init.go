@@ -5,61 +5,66 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/choigawoon/rulesctl/internal/fileutils"
 	"github.com/spf13/cobra"
 )
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "규칙 디렉토리 초기화",
-	Long: `.cursor/rules 디렉토리를 생성하고 샘플 규칙 파일을 추가합니다.
-이 명령어는 rulesctl을 처음 사용할 때 유용합니다.`,
+	Short: "기본 규칙 파일 생성",
+	Long: `현재 디렉토리에 .cursor/rules 디렉토리와 기본 규칙 파일을 생성합니다.
+생성되는 파일:
+- .cursor/rules/hello.mdc: 기본 인사말 규칙`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// 1. 규칙 디렉토리 생성
-		if err := fileutils.EnsureRulesDir(); err != nil {
-			return fmt.Errorf("규칙 디렉토리 생성 실패: %v", err)
-		}
-
-		// 2. 샘플 파일 경로 생성
-		rulesDir, err := fileutils.GetRulesDirPath()
+		// 현재 디렉토리 확인
+		workDir, err := os.Getwd()
 		if err != nil {
-			return fmt.Errorf("규칙 디렉토리 경로 확인 실패: %v", err)
+			return fmt.Errorf("작업 디렉토리 확인 실패: %w", err)
 		}
 
-		// 3. 샘플 디렉토리 및 파일 생성
-		sampleFiles := map[string]string{
-			"example/hello.mdc": "# 예제 규칙 파일\n\n이것은 예제 규칙 파일입니다.\n사용자 정의 규칙을 작성하여 Cursor AI 동작을 맞춤화할 수 있습니다.",
-			"python/linting.mdc": "# Python 린팅 규칙\n\n항상 PEP8 스타일 가이드를 따르세요.\n들여쓰기는 공백 4칸을 사용하고, 한 줄은 79자를 넘지 않도록 합니다.",
-			"javascript/coding.mdc": "# JavaScript 코딩 규칙\n\n- 세미콜론을 항상 사용하세요.\n- 변수 선언에는 const와 let을 사용하세요. var는 사용하지 마세요.\n- 함수는 화살표 함수를 선호합니다.",
+		// .cursor/rules 디렉토리 생성
+		rulesDir := filepath.Join(workDir, ".cursor", "rules")
+		if err := os.MkdirAll(rulesDir, 0755); err != nil {
+			return fmt.Errorf(".cursor/rules 디렉토리 생성 실패: %w", err)
 		}
 
-		for path, content := range sampleFiles {
-			fullPath := filepath.Join(rulesDir, path)
-			dirPath := filepath.Dir(fullPath)
+		// hello.mdc 파일 생성
+		helloPath := filepath.Join(rulesDir, "hello.mdc")
+		helloContent := `# Hello Rule
 
-			// 디렉토리 생성
-			if err := os.MkdirAll(dirPath, 0755); err != nil {
-				return fmt.Errorf("디렉토리 생성 실패 %s: %v", dirPath, err)
-			}
+이 규칙은 모든 대화에서 "hello, rulesctl"로 시작하도록 합니다.
 
-			// 파일이 이미 존재하는지 확인
-			if _, err := os.Stat(fullPath); !os.IsNotExist(err) {
-				fmt.Printf("파일이 이미 존재합니다: %s\n", path)
-				continue
-			}
+<instructions>
+1. 모든 대화의 시작에 "hello, rulesctl"을 출력합니다.
+2. 이 인사말은 다른 응답 내용보다 먼저 나와야 합니다.
+3. 인사말 다음에는 빈 줄을 추가하여 본문과 구분합니다.
+</instructions>
 
-			// 파일 생성
-			if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
-				return fmt.Errorf("파일 생성 실패 %s: %v", path, err)
-			}
-			fmt.Printf("샘플 파일 생성: %s\n", path)
+<examples>
+예시 1:
+User: 파일을 생성해줘
+Assistant: hello, rulesctl
+
+네, 어떤 파일을 생성하시겠습니까?
+
+예시 2:
+User: 코드를 검토해줘
+Assistant: hello, rulesctl
+
+코드를 검토해드리겠습니다.
+</examples>
+
+<rules>
+- 모든 응답은 "hello, rulesctl"로 시작해야 합니다.
+- 인사말과 본문 사이에 빈 줄을 넣어야 합니다.
+- 인사말은 다른 서식 없이 일반 텍스트로 출력합니다.
+</rules>`
+
+		if err := os.WriteFile(helloPath, []byte(helloContent), 0644); err != nil {
+			return fmt.Errorf("hello.mdc 파일 생성 실패: %w", err)
 		}
 
-		fmt.Printf("\n초기화가 완료되었습니다.\n")
-		fmt.Printf("생성된 디렉토리: %s\n", rulesDir)
-		fmt.Printf("\n다음 명령어로 규칙을 업로드할 수 있습니다:\n")
-		fmt.Printf("  rulesctl upload \"my-rules\"\n")
-
+		fmt.Println("기본 규칙 파일이 생성되었습니다:")
+		fmt.Printf("- %s\n", helloPath)
 		return nil
 	},
 }

@@ -38,6 +38,9 @@ rulesctl auth
 # 도움말 보기
 rulesctl --help
 
+# upload, download를 테스트할 샘플 규칙 파일 생성
+rulesctl init
+
 # 규칙 목록 보기 (최근 1달 이내)
 rulesctl list
 
@@ -57,6 +60,12 @@ rulesctl download --gistid abc123       # 공개 Gist ID로 다운로드
 # GitHub 토큰으로 인증
 rulesctl auth
 # 프롬프트에 Personal Access Token 입력
+```
+
+기본 규칙 파일 생성하기:
+```bash
+# .cursor/rules 디렉토리와 hello.mdc 파일 생성
+rulesctl init
 ```
 
 규칙 세트 업로드하기:
