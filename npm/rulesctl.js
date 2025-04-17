@@ -16,12 +16,20 @@ async function downloadFile(url, dest) {
   console.log(`Saving to: ${dest}`);
   
   return new Promise((resolve, reject) => {
-    https.get(url, response => {
+    const options = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'User-Agent': 'rulesctl-installer'
+      }
+    };
+
+    https.get(url, options, response => {
       console.log(`Response status: ${response.statusCode}`);
       
-      if (response.statusCode === 302) {
+      if (response.statusCode === 302 || response.statusCode === 301) {
         console.log(`Following redirect to: ${response.headers.location}`);
-        https.get(response.headers.location, redirectedResponse => {
+        https.get(response.headers.location, options, redirectedResponse => {
           if (redirectedResponse.statusCode !== 200) {
             return reject(new Error(`Failed to download: ${redirectedResponse.statusCode}`));
           }
@@ -116,7 +124,11 @@ async function install() {
   }
 
   const assetName = `rulesctl_${platformMap[platform]}_${archMap[arch]}${platform === "win32" ? ".zip" : ".tar.gz"}`;
-  const downloadUrl = `https://github.com/${OWNER}/${REPO}/releases/download/${VERSION}/${assetName}`;
+  
+  // Try direct download URL first
+  const directUrl = `https://github.com/${OWNER}/${REPO}/releases/download/${VERSION}/${assetName}`;
+  // Fallback to API URL with cache bypass
+  const apiUrl = `https://api.github.com/repos/${OWNER}/${REPO}/releases/latest/assets/${assetName}?t=${Date.now()}`;
 
   const binDir = path.join(__dirname, "bin");
   if (!fs.existsSync(binDir)) {
@@ -127,11 +139,16 @@ async function install() {
   const archivePath = path.join(os.tmpdir(), assetName);
 
   try {
-    // 다운로드
-    console.log(`Downloading ${assetName}...`);
-    await downloadFile(downloadUrl, archivePath);
+    // Try direct download first
+    console.log(`Downloading ${assetName} using direct URL...`);
+    try {
+      await downloadFile(directUrl, archivePath);
+    } catch (directError) {
+      console.log("Direct download failed, trying API URL...");
+      await downloadFile(apiUrl, archivePath);
+    }
     
-    // 압축 해제 및 설치
+    // Extract and install
     await extractBinary(archivePath, binDir, platform);
     
     console.log("rulesctl installed successfully!");
