@@ -206,3 +206,32 @@
   - 특정 revision의 규칙 세트를 다운로드하는 기능
   - `--revision` 플래그를 통해 특정 버전 지정 가능
   - revision 히스토리 조회 기능 추가
+
+## 현재 작업 중인 이슈
+
+### 버전 관리 개선
+1. 버전 정보 중앙화
+   - [x] internal/version/version.go 패키지 생성
+   - [x] goreleaser ldflags 설정 업데이트
+   - [ ] npm 패키지 버전 동기화 문제
+     - 현재 상황: npm install -g ./rulesctl-0.1.2.tgz로 로컬 설치 시 버전이 0.1.0으로 표시됨
+     - 원인: 
+       1. goreleaser가 빌드한 바이너리와 npm 패키지의 바이너리가 다름
+       2. npm/rulesctl.js의 VERSION과 실제 바이너리 버전이 불일치
+     - 해결 방안 검토:
+       1. npm pack 전에 goreleaser 빌드 바이너리를 npm/bin에 복사
+       2. 로컬 설치 시에도 GitHub releases에서 바이너리 다운로드
+       3. goreleaser post hooks 수정 검토
+
+### 다음 작업
+1. 버전 관리 이슈 해결
+   - [ ] npm 패키지 설치 방식 결정 (로컬 바이너리 vs GitHub releases)
+   - [ ] rulesctl.js 수정
+   - [ ] 설치 프로세스 테스트
+   - [ ] DEPLOY.md 문서 업데이트
+
+2. 남은 작업
+   - [ ] 에러 처리 및 로깅 개선
+   - [ ] 진행 상황 표시 개선
+   - [ ] 사용법 및 도움말 개선
+   - [ ] GitHub Actions 워크플로우 설정
