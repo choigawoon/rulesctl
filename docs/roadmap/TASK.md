@@ -23,10 +23,10 @@
 ## 1. 프로젝트 초기 설정 (2시간)
 
 ### 1-1. 개발 환경 구성 (1시간)
-- [ ] Go 프로젝트 초기화 (go.mod, go.sum)
-- [ ] Cobra 패키지 설치 및 기본 CLI 구조 설정
-- [ ] 디렉토리 구조 생성 (cmd, internal, pkg 등)
-- [ ] .gitignore 설정
+- [x] Go 프로젝트 초기화 (go.mod, go.sum)
+- [x] Cobra 패키지 설치 및 기본 CLI 구조 설정
+- [x] 디렉토리 구조 생성 (cmd, internal, pkg 등)
+- [x] .gitignore 설정
 
 ### 1-2. 기본 명령어 구조 설정 (1시간)
 - [ ] root.go 작성 (기본 명령어 설정)
