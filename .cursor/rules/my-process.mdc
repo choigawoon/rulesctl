@@ -3,6 +3,17 @@ description:
 globs: 
 alwaysApply: true
 ---
+# Generate Commit Message Rule
+- Write commit message in English
+- format like
+
+```
+Summary
+- issue, action
+- issue, action
+```
+
+
 # README.md Rules
 
 - README.md is for the user

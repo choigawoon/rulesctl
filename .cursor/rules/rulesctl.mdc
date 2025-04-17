@@ -1,11 +1,11 @@
 ---
-description: 파일 생성하거나 삭제, 참조할때 참고합니다.
+description: 명령어를 실행해야할 때, 파일 생성하거나 삭제, 참조할때 참고합니다.
 globs: 
 alwaysApply: false
 ---
 # 작업시 디렉토리 위치
 
-rulesctl 바이너리 구현을 할때, 작업 디렉토리는 rulesctl/ 이야.
+rulesctl 구현을 할때, 작업 디렉토리는 rulesctl/ 이야.
 코드 생성 및 참조할 때 해당 디렉토리로부터 시작해.
 
 npm 배포 관련 작업을 할 때, 작업 디렉토리는 npm/ 이야.

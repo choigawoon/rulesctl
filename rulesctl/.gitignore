@@ -31,4 +31,5 @@ Thumbs.db
 .env.local 
 
 # 빌드결과
+dist/
 bin/
