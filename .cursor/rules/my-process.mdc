@@ -6,6 +6,9 @@ alwaysApply: true
 # 명령어 실행해야할 때 규칙
 - 실행전 반드시 현재 디렉토리를 먼저 확인하는 명령어를 실행하고, 진행
 
+# goreleaser
+- rulesctl/.goreleaser.yaml 에 설정파일 위치
+
 # README.md Rules
 
 - README.md is for the user
