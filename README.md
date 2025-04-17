@@ -36,6 +36,8 @@ The token will be stored in JSON format in the `~/.rulesctl/config` file in your
 > **Important**: Your Personal Access Token needs the following permissions:
 > - Gist (read/write) permissions
 > - repo permissions (for accessing file lists at https://github.com/PatrickJS/awesome-cursorrules/tree/main/rules-new)
+![1](docs/images/how-to-get-token-1.png)
+![2](docs/images/how-to-get-token-2.png)
 
 For information on how to create a token, refer to the [GitHub official documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 

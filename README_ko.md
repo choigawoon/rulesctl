@@ -143,6 +143,8 @@ rulesctl delete "my-python-ruleset" --force
 > - 다운로드 시 현재 실행 경로에 `.cursor/rules` 디렉토리가 없으면 자동으로 생성됩니다.
 > - 원래 업로드된 디렉토리 구조와 파일들이 그대로 복원됩니다.
 > - 다운로드 후 바로 사용할 수 있는 상태로 준비됩니다.
+![1](docs/images/how-to-get-token-1.png)
+![2](docs/images/how-to-get-token-2.png)
 
 ## 지원 플랫폼
 
