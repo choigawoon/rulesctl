@@ -1,18 +1,43 @@
 package gist
 
 import (
+	"bufio"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 	"time"
 )
 
+func getTestToken() string {
+	file, err := os.Open(".env.local")
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "GITHUB_PERSONAL_ACCESS_TOKEN=") {
+			return strings.TrimPrefix(line, "GITHUB_PERSONAL_ACCESS_TOKEN=")
+		}
+	}
+	return ""
+}
+
 func TestFetchUserGists(t *testing.T) {
+	token := getTestToken()
+	if token == "" {
+		t.Skip("테스트 토큰이 없습니다. .env.local 파일에 GITHUB_PERSONAL_ACCESS_TOKEN을 설정해주세요.")
+	}
+
 	// 테스트 서버 생성
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 인증 헤더 확인
-		if r.Header.Get("Authorization") != "token test-token" {
+		if r.Header.Get("Authorization") != "token "+token {
 			t.Errorf("잘못된 인증 헤더: %s", r.Header.Get("Authorization"))
 		}
 
@@ -53,7 +78,7 @@ func TestFetchUserGists(t *testing.T) {
 	defer func() { baseURL = oldBaseURL }()
 
 	// Gist 목록 가져오기 테스트
-	gists, err := FetchUserGists("test-token")
+	gists, err := FetchUserGists(token)
 	if err != nil {
 		t.Errorf("Gist 목록 가져오기 실패: %v", err)
 	}

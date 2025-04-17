@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,10 +14,32 @@ import (
 
 var testTime = time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
 
+func getTestToken() string {
+	file, err := os.Open(".env.local")
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "GITHUB_PERSONAL_ACCESS_TOKEN=") {
+			return strings.TrimPrefix(line, "GITHUB_PERSONAL_ACCESS_TOKEN=")
+		}
+	}
+	return ""
+}
+
 func TestListCmd(t *testing.T) {
+	token := getTestToken()
+	if token == "" {
+		t.Skip("테스트 토큰이 없습니다. .env.local 파일에 GITHUB_PERSONAL_ACCESS_TOKEN을 설정해주세요.")
+	}
+
 	// 테스트용 설정 생성
 	testConfig := &config.Config{
-		Token: "test-token",
+		Token: token,
 	}
 
 	// 테스트용 Gist 데이터 생성

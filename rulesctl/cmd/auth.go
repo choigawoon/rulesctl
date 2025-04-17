@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"golang.org/x/term"
 
 	"github.com/choigawoon/rulesctl/pkg/config"
 	"github.com/spf13/cobra"
@@ -22,7 +24,12 @@ var authCmd = &cobra.Command{
 		token, _ := cmd.Flags().GetString("token")
 		if token == "" {
 			fmt.Print("GitHub Personal Access Token을 입력하세요: ")
-			fmt.Scanln(&token)
+			tokenBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
+			fmt.Println() // 줄바꿈을 위해 추가
+			if err != nil {
+				return fmt.Errorf("토큰 읽기 실패: %w", err)
+			}
+			token = string(tokenBytes)
 		}
 
 		if token == "" {
