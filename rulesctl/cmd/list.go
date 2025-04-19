@@ -18,6 +18,7 @@ const (
 	dateWidth  = 19    // Date width
 	idWidth    = 32    // Gist ID width
 	revWidth   = 8     // Revision width
+	typeWidth  = 8     // Type width (Public/Private)
 	separator  = "..."
 )
 
@@ -33,7 +34,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List rules stored in GIST",
 	Long: `List all rules stored in GIST.
-By default, outputs in [Title] [Last Modified] [Gist ID] format.
+By default, outputs in [Type] [Title] [Last Modified] [Gist ID] format.
 Use --detail flag to include revision information.
 
 Examples:
@@ -72,17 +73,18 @@ Examples:
 		detail, _ := cmd.Flags().GetBool("detail")
 
 		// Print table header
+		typeHeader := truncateString("Type", typeWidth)
 		titleHeader := truncateString("Title", titleWidth)
 		dateHeader := truncateString("Last Modified", dateWidth)
 		idHeader := truncateString("Gist ID", idWidth)
 		
 		if detail {
 			revHeader := truncateString("Rev", revWidth)
-			fmt.Printf("%s  %s  %s  %s\n", titleHeader, dateHeader, idHeader, revHeader)
-			fmt.Println(strings.Repeat("-", titleWidth+dateWidth+idWidth+revWidth+6))
+			fmt.Printf("%s  %s  %s  %s  %s\n", typeHeader, titleHeader, dateHeader, idHeader, revHeader)
+			fmt.Println(strings.Repeat("-", typeWidth+titleWidth+dateWidth+idWidth+revWidth+8))
 		} else {
-			fmt.Printf("%s  %s  %s\n", titleHeader, dateHeader, idHeader)
-			fmt.Println(strings.Repeat("-", titleWidth+dateWidth+idWidth+4))
+			fmt.Printf("%s  %s  %s  %s\n", typeHeader, titleHeader, dateHeader, idHeader)
+			fmt.Println(strings.Repeat("-", typeWidth+titleWidth+dateWidth+idWidth+6))
 		}
 
 		// Print each Gist information
@@ -92,6 +94,11 @@ Examples:
 				description = "(No title)"
 			}
 			
+			gistType := "Private"
+			if g.Public {
+				gistType = "Public"
+			}
+			typeStr := truncateString(gistType, typeWidth)
 			title := truncateString(description, titleWidth)
 			date := truncateString(g.UpdatedAt.Format("2006-01-02 15:04:05"), dateWidth)
 			id := truncateString(g.ID, idWidth)
@@ -103,9 +110,9 @@ Examples:
 					continue // Skip if history fetch fails
 				}
 				rev := truncateString(fmt.Sprintf("%d", gistDetail.RevisionNumber), revWidth)
-				fmt.Printf("%s  %s  %s  %s\n", title, date, id, rev)
+				fmt.Printf("%s  %s  %s  %s  %s\n", typeStr, title, date, id, rev)
 			} else {
-				fmt.Printf("%s  %s  %s\n", title, date, id)
+				fmt.Printf("%s  %s  %s  %s\n", typeStr, title, date, id)
 			}
 		}
 

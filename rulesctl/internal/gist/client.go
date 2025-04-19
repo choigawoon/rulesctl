@@ -91,6 +91,7 @@ func (c *Client) FetchUserGists() ([]struct {
 	ID          string
 	Description string
 	UpdatedAt   time.Time
+	Public      bool
 }, error) {
 	gists, _, err := c.client.Gists.List(c.ctx, "", &github.GistListOptions{})
 	if err != nil {
@@ -101,6 +102,7 @@ func (c *Client) FetchUserGists() ([]struct {
 		ID          string
 		Description string
 		UpdatedAt   time.Time
+		Public      bool
 	}, 0, len(gists))
 
 	for _, gist := range gists {
@@ -111,10 +113,12 @@ func (c *Client) FetchUserGists() ([]struct {
 			ID          string
 			Description string
 			UpdatedAt   time.Time
+			Public      bool
 		}{
 			ID:          *gist.ID,
 			Description: *gist.Description,
 			UpdatedAt:   gist.UpdatedAt.Time,
+			Public:      gist.Public != nil && *gist.Public,
 		})
 	}
 

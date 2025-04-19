@@ -1,10 +1,10 @@
 # rulesctl
 
-GitHub Gist를 이용한 Cursor Rules 관리 도구
+GitHub Gist를 이용한 Cursor Rules 관리 및 공유 도구
 
 ## 문제 → 해결책
 
-Cursor Rules를 효과적으로 관리하고 공유하기 위한 도구가 필요했습니다. rulesctl은 GitHub Gist를 활용하여 규칙을 체계적으로 저장하고 관리할 수 있게 해줍니다.
+Cursor Rules를 효과적으로 관리하고 다른 개발자들과 손쉽게 공유하기 위한 도구가 필요했습니다. rulesctl은 GitHub Gist를 활용하여 규칙을 체계적으로 저장하고, public/private 옵션을 통해 선택적으로 공유할 수 있게 해줍니다.
 
 ## 사용법
 
@@ -16,9 +16,17 @@ NPM을 통해 설치할 수 있습니다:
 npm install -g rulesctl
 ```
 
-### 인증 설정 (필수)
+### 인증 설정
 
-rulesctl을 사용하기 위해서는 GitHub 인증 설정이 **반드시** 필요합니다. 인증 설정은 다음 두 가지 방법으로 할 수 있습니다:
+GitHub 토큰은 다음 기능을 사용할 때 필요합니다:
+- 규칙 업로드 (public/private)
+- 내 Gist 목록 조회
+- 제목으로 규칙 검색
+- private Gist 다운로드
+
+> **Note**: Public Gist를 ID로 다운로드할 때는 토큰이 필요하지 않습니다!
+
+토큰 설정은 다음 두 가지 방법으로 할 수 있습니다:
 
 1. 환경 변수 사용 (권장)
 ```bash
@@ -39,6 +47,25 @@ auth 명령어를 사용할 경우 토큰은 홈 디렉토리의 `~/.rulesctl/co
 
 토큰 생성 방법은 [GitHub 공식 문서](https://docs.github.com/ko/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)를 참조하세요.
 
+### 시작하기
+
+시작하는 방법에는 두 가지가 있습니다:
+
+1. 예제 규칙으로 시작하기 (권장)
+```bash
+# 공유된 예제 규칙 다운로드 (토큰 불필요)
+rulesctl download --gistid 74abf627d19e4114ac51bf0b6fbec99d
+
+# 또는 직접 예제 생성
+rulesctl init --sample
+```
+
+2. 새로 시작하기
+```bash
+# 빈 규칙 디렉토리 생성
+rulesctl init
+```
+
 ### 기본 명령어
 
 ```bash
@@ -49,22 +76,48 @@ rulesctl --help
 rulesctl init
 rulesctl init --sample  # 예제 규칙 파일도 함께 생성
 
+# 예제 규칙 다운로드 (토큰 불필요)
+rulesctl download --gistid 74abf627d19e4114ac51bf0b6fbec99d
+
 # 규칙 목록 보기 (최근 1달 이내만 표시)
-rulesctl list                # 기본 정보만 표시
+rulesctl list                # Public/Private 여부 및 기본 정보 표시
 rulesctl list --detail      # revision 정보 포함하여 상세 표시
 
-# 규칙 업로드하기 (기본적으로 비공개)
-rulesctl upload "규칙세트이름"
-rulesctl upload "규칙세트이름" --public  # 공개 Gist로 업로드
+# 규칙 업로드하기
+rulesctl upload "규칙세트이름"        # private으로 업로드 (기본값)
+rulesctl upload "규칙세트이름" --public  # public으로 업로드 (다른 사용자와 공유 가능)
 
 # 규칙 다운로드하기
 rulesctl download "규칙세트이름"         # 내 Gist에서 제목으로 검색
-rulesctl download --gistid abc123       # 공개 Gist ID로 다운로드
-
-# 규칙 삭제하기
-rulesctl delete "규칙세트이름"           # 제목으로 검색하여 삭제
-rulesctl delete "규칙세트이름" --force    # 확인 없이 바로 삭제
+rulesctl download --gistid abc123       # 공개된 Gist ID로 다운로드 (토큰 불필요)
 ```
+
+### 규칙 공유하기 📢
+
+rulesctl을 사용하면 다른 개발자들과 손쉽게 규칙을 공유할 수 있습니다:
+
+1. 규칙 공유하기 (업로드)
+```bash
+# 규칙을 public으로 업로드
+rulesctl upload "python-best-practices" --public
+
+# 업로드 후 list 명령어로 Gist ID 확인
+rulesctl list
+# Type     Title                    Last Modified         Gist ID
+# --------------------------------------------------------------
+# Public   python-best-practices    2024-03-20 15:04:05  abc123...
+```
+
+2. 규칙 받아오기 (다운로드)
+```bash
+# 다른 사용자의 public 규칙을 Gist ID로 다운로드
+rulesctl download --gistid abc123  # GitHub 토큰 없이도 가능!
+
+# 충돌이 있는 경우 강제 다운로드
+rulesctl download --gistid abc123 --force
+```
+
+> **Tip**: Public으로 업로드된 규칙은 GitHub 토큰 없이도 다운로드할 수 있어, 팀원들과 쉽게 공유할 수 있습니다!
 
 ### 사용 예시
 
@@ -86,32 +139,17 @@ rulesctl init --sample
 
 규칙 세트 업로드하기:
 ```bash
-# 현재 디렉토리의 규칙을 특정 이름으로 업로드 (기본적으로 비공개)
+# 현재 디렉토리의 규칙을 private으로 업로드 (기본값)
 rulesctl upload "my-python-ruleset"
 
-# 특정 이름과 설명으로 업로드
-rulesctl upload "my-python-ruleset" --desc "Python 프로젝트를 위한 규칙 모음"
-
-# 다른 사람과 공유하기 위해 공개로 업로드
+# 다른 사람과 공유하기 위해 public으로 업로드
 rulesctl upload "my-python-ruleset" --public
 
-# 중복된 이름으로 강제 업로드 (확인 프롬프트 없음)
-rulesctl upload "my-python-ruleset" --force
-```
-
-규칙 세트 삭제하기:
-```bash
-# 제목으로 검색하여 삭제
-rulesctl delete "my-python-ruleset"
-
-# 확인 없이 바로 삭제
-rulesctl delete "my-python-ruleset" --force
-```
-
-규칙 목록 확인하기:
-```bash
-# 최근 1달 이내에 업로드된 규칙 목록 보기
+# 업로드된 규칙의 public/private 상태 확인
 rulesctl list
+
+# 중복된 이름으로 강제 업로드
+rulesctl upload "my-python-ruleset" --force
 ```
 
 규칙 세트 다운로드하기:
@@ -119,11 +157,10 @@ rulesctl list
 # 내 Gist에서 제목으로 검색하여 다운로드
 rulesctl download "my-python-ruleset"
 
-# 공개된 Gist를 ID로 직접 다운로드
+# 다른 사람의 public Gist를 ID로 다운로드 (토큰 불필요)
 rulesctl download --gistid abc123
 
 # 충돌이 있어도 강제로 다운로드
-rulesctl download "my-python-ruleset" --force
 rulesctl download --gistid abc123 --force
 ```
 
