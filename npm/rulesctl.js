@@ -6,10 +6,12 @@ const path = require("path");
 const https = require("https");
 const fs = require("fs");
 const { execSync } = require("child_process");
+const AdmZip = require('adm-zip');
+const { version } = require("./package.json");
 
 const OWNER = "choigawoon";
 const REPO = "rulesctl";
-const VERSION = "v0.1.3";
+const VERSION = `v${version.split('-')[0]}`;
 
 async function downloadFile(url, dest) {
   console.log(`Downloading from: ${url}`);
@@ -74,8 +76,14 @@ async function extractBinary(archivePath, targetDir, platform) {
     
     // 압축 해제
     if (isWindows) {
-      // Windows: unzip 사용
-      execSync(`powershell -command "Expand-Archive -Path '${archivePath}' -DestinationPath '${tempDir}'"`, { stdio: 'inherit' });
+      try {
+        console.log('Extracting ZIP file using adm-zip...');
+        const zip = new AdmZip(archivePath);
+        zip.extractAllTo(tempDir, true);
+      } catch (error) {
+        console.error('Failed to extract ZIP file:', error);
+        throw error;
+      }
     } else {
       // macOS/Linux: tar 사용
       execSync(`tar -xzf "${archivePath}" -C "${tempDir}"`, { stdio: 'inherit' });
@@ -83,13 +91,21 @@ async function extractBinary(archivePath, targetDir, platform) {
     
     // 바이너리 찾기
     const extractedBinary = path.join(tempDir, binName);
+    if (!fs.existsSync(extractedBinary)) {
+      console.error(`Binary not found at expected path: ${extractedBinary}`);
+      console.error('Contents of temp directory:', fs.readdirSync(tempDir));
+      throw new Error('Binary not found after extraction');
+    }
+    
     const targetBinary = path.join(targetDir, finalName);
+    console.log(`Copying binary from ${extractedBinary} to ${targetBinary}`);
     
     // 바이너리 이동
     fs.copyFileSync(extractedBinary, targetBinary);
     fs.chmodSync(targetBinary, "755");
     
     // 임시 파일 정리
+    console.log('Cleaning up temporary files...');
     fs.rmSync(tempDir, { recursive: true, force: true });
     fs.rmSync(archivePath);
     
@@ -97,6 +113,17 @@ async function extractBinary(archivePath, targetDir, platform) {
     return targetBinary;
   } catch (error) {
     console.error("Failed to extract binary:", error);
+    // 임시 파일 정리 시도
+    try {
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+      if (fs.existsSync(archivePath)) {
+        fs.rmSync(archivePath);
+      }
+    } catch (cleanupError) {
+      console.error("Failed to clean up temporary files:", cleanupError);
+    }
     throw error;
   }
 }

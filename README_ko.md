@@ -160,3 +160,52 @@ rulesctl은 다음 플랫폼을 지원합니다:
 ## 기여하기
 
 기여 방법은 [기여 가이드](docs/ko/GET-STARTED.md#기여-가이드)를 참조하세요. 
+
+## 로드맵 🚀
+
+앞으로 제공될 예정인 기능들입니다:
+
+### 설치 개선
+- [ ] Windows 사용자를 위한 설치 프로세스 개선
+  - Chocolatey 패키지 제공
+  - 자동 PATH 환경변수 설정
+  - 설치 과정 간소화
+
+### 템플릿 규칙 세트
+- [ ] 주요 기술 스택별 템플릿 규칙 세트 제공
+  - 프론트엔드
+    - React 개발 환경
+    - Vue.js 개발 환경
+    - Next.js/Nuxt.js 개발 환경
+  - 백엔드
+    - FastAPI 개발 환경
+    - NestJS 개발 환경
+    - Spring Boot 개발 환경
+  - DevOps
+    - Kubernetes/kubectl 작업 환경
+    - Terraform 인프라 관리
+    - Docker 컨테이너 관리
+
+### 사용자 경험 개선
+- [ ] 규칙 검색 및 필터링 기능
+- [ ] 규칙 세트 버전 관리 기능
+- [ ] 팀 협업을 위한 규칙 공유 기능
+- [ ] 웹 인터페이스 제공
+
+### 커뮤니티 참여 🤝
+- [ ] 사용자 피드백 기반 개선
+  - GitHub Discussions를 통한 의견 수렴
+  - Reddit 커뮤니티 피드백 수집
+  - 기술 블로그를 통한 사용 경험 공유
+- [ ] 템플릿 규칙 세트 기여 가이드 제공
+  - 커뮤니티 기반 템플릿 제작 및 공유
+  - 템플릿 품질 관리 기준 수립
+- [ ] 다국어 문서화 지원 확대
+
+진행 상황과 새로운 기능 요청은 [GitHub Issues](https://github.com/choigawoon/rulesctl/issues)를 통해 확인하고 제안하실 수 있습니다.
+
+더 나은 도구를 만들기 위해 여러분의 의견이 필요합니다:
+- 💡 아이디어 제안: [GitHub Discussions](https://github.com/choigawoon/rulesctl/discussions/categories/ideas)
+- 🐛 버그 리포트: [GitHub Issues](https://github.com/choigawoon/rulesctl/issues)
+- 💬 질문하기: [GitHub Discussions Q&A](https://github.com/choigawoon/rulesctl/discussions/categories/q-a)
+- 📝 사용 경험 공유: [GitHub Discussions Show and tell](https://github.com/choigawoon/rulesctl/discussions/categories/show-and-tell) 
