@@ -32,7 +32,7 @@ func NewClient() (*Client, error) {
 	}, nil
 }
 
-func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bool) (string, error) {
+func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bool, public bool) (string, error) {
 	// Search for existing Gist
 	gists, _, err := c.client.Gists.List(c.ctx, "", &github.GistListOptions{})
 	if err != nil {
@@ -72,7 +72,6 @@ func (c *Client) CreateOrUpdateGist(name string, files map[string]File, force bo
 
 	// Create new Gist
 	description := name
-	public := false
 	newGist := &github.Gist{
 		Description: &description,
 		Public:      &public,

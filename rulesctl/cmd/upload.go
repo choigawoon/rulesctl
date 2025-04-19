@@ -14,6 +14,7 @@ import (
 var (
 	forceUpload bool
 	preview     bool
+	public      bool
 )
 
 var uploadCmd = &cobra.Command{
@@ -22,7 +23,8 @@ var uploadCmd = &cobra.Command{
 	Long: `Upload rule files from local .cursor/rules directory to GIST.
 The rule set name should be enclosed in quotes.
 
-Use --preview flag to preview metadata without actual upload.`,
+Use --preview flag to preview metadata without actual upload.
+Use --public flag to create a public gist.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Load configuration
@@ -115,7 +117,7 @@ Use --preview flag to preview metadata without actual upload.`,
 		}
 
 		// Create or update Gist
-		gistID, err := client.CreateOrUpdateGist(title, files, forceUpload)
+		gistID, err := client.CreateOrUpdateGist(title, files, forceUpload, public)
 		if err != nil {
 			return fmt.Errorf("failed to upload Gist: %v", err)
 		}
@@ -129,4 +131,5 @@ func init() {
 	rootCmd.AddCommand(uploadCmd)
 	uploadCmd.Flags().BoolVarP(&forceUpload, "force", "f", false, "Force upload when conflicts exist")
 	uploadCmd.Flags().BoolVarP(&preview, "preview", "p", false, "Preview metadata before upload")
+	uploadCmd.Flags().BoolVarP(&public, "public", "", false, "Create a public gist")
 } 
