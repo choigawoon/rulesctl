@@ -1,6 +1,7 @@
 # rulesctl
 
 GitHub Gist를 이용한 Cursor Rules 관리 및 공유 도구
+![introduce](docs/images/rulesctl.png)
 
 ## 문제 → 해결책
 

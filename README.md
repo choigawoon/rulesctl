@@ -1,6 +1,7 @@
 # rulesctl
 
 Cursor Rules management tool using GitHub Gist
+![introduce](docs/images/rulesctl.png)
 
 ## Problem → Solution
 
