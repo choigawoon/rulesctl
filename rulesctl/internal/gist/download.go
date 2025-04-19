@@ -20,7 +20,10 @@ func FetchGist(token, gistID string) (*Gist, error) {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "token "+token)
+	// Add authorization header only if token is provided
+	if token != "" {
+		req.Header.Set("Authorization", "token "+token)
+	}
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
 	resp, err := client.Do(req)
@@ -31,6 +34,13 @@ func FetchGist(token, gistID string) (*Gist, error) {
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("Gist not found: %s", gistID)
+	}
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		if token == "" {
+			return nil, fmt.Errorf("this Gist requires authentication. Please run 'rulesctl auth' to set your token")
+		}
+		return nil, fmt.Errorf("invalid or expired token")
 	}
 
 	if resp.StatusCode != http.StatusOK {

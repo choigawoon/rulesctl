@@ -22,29 +22,30 @@ Examples:
   rulesctl download "python-linting-rules"
   rulesctl download "python-linting-rules" --force
 
-  # Download by Gist ID (public Gist)
+  # Download by Gist ID (public Gist, no token needed)
   rulesctl download --gistid abc123
   rulesctl download --gistid abc123 --force`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Load configuration
-		cfg, err := config.LoadConfig()
-		if err != nil {
-			return fmt.Errorf("failed to load configuration: %w", err)
-		}
-
-		if cfg.Token == "" {
-			cmd.SilenceUsage = true
-			return fmt.Errorf("GitHub token not set. Please run 'rulesctl auth' to set your token")
-		}
-
+		var token string
 		var targetGistID string
 
+		// Load configuration
+		cfg, err := config.LoadConfig()
+		if err == nil {
+			token = cfg.Token
+		}
+
 		if gistID != "" {
-			// Download by Gist ID
+			// Download by Gist ID (public gist, token optional)
 			targetGistID = gistID
 		} else {
-			// Download by title
+			// Download by title (requires token)
+			if token == "" {
+				cmd.SilenceUsage = true
+				return fmt.Errorf("GitHub token not set. Please run 'rulesctl auth' to set your token")
+			}
+
 			if len(args) == 0 {
 				cmd.SilenceUsage = true
 				return fmt.Errorf("please specify a title or use --gistid option")
@@ -75,7 +76,7 @@ Examples:
 		}
 
 		// Fetch Gist
-		g, err := gist.FetchGist(cfg.Token, targetGistID)
+		g, err := gist.FetchGist(token, targetGistID)
 		if err != nil {
 			cmd.SilenceUsage = true
 			return fmt.Errorf("failed to fetch Gist: %w", err)
@@ -114,7 +115,7 @@ Examples:
 
 		// Download files
 		fmt.Printf("Downloading rules... (Gist ID: %s)\n", targetGistID)
-		if err := gist.DownloadFiles(cfg.Token, targetGistID, meta, force); err != nil {
+		if err := gist.DownloadFiles(token, targetGistID, meta, force); err != nil {
 			return fmt.Errorf("failed to download: %w", err)
 		}
 
