@@ -32,7 +32,7 @@ type Metadata struct {
 func NewMetadata() *Metadata {
 	return &Metadata{
 		SchemaVersion: "1.0.0",
-		CLIVersion:    "0.1.3", // TODO: 버전 관리
+		CLIVersion:    "0.1.4", // TODO: 버전 관리
 		UpdatedAt:     time.Now(),
 		Structure:     make(DirectoryStructure),
 		Files:         make([]FileMetadata, 0),

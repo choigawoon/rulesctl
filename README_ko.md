@@ -202,6 +202,14 @@ rulesctl은 다음 플랫폼을 지원합니다:
 
 앞으로 제공될 예정인 기능들입니다:
 
+### 사용자간 공유기능 강화 🌟
+- [ ] 기술 스택별 규칙 공유 플랫폼 구축
+  - npm, pip와 같은 패키지 서버 구축
+  - 기술 스택별 규칙 템플릿 저장소 제공
+  - 버전 관리 및 의존성 관리 기능
+  - 인기도 기반 규칙 추천 시스템
+  - 기술 스택별 커뮤니티 형성 지원
+
 ### 설치 개선
 - [ ] Windows 사용자를 위한 설치 프로세스 개선
   - Chocolatey 패키지 제공
@@ -234,6 +242,7 @@ rulesctl은 다음 플랫폼을 지원합니다:
   - GitHub Discussions를 통한 의견 수렴
   - Reddit 커뮤니티 피드백 수집
   - 기술 블로그를 통한 사용 경험 공유
+  - Discord 커뮤니티 참여 ([참여하기](https://discord.gg/Krbc9cFBPk))
 - [ ] 템플릿 규칙 세트 기여 가이드 제공
   - 커뮤니티 기반 템플릿 제작 및 공유
   - 템플릿 품질 관리 기준 수립
@@ -246,3 +255,5 @@ rulesctl은 다음 플랫폼을 지원합니다:
 - 🐛 버그 리포트: [GitHub Issues](https://github.com/choigawoon/rulesctl/issues)
 - 💬 질문하기: [GitHub Discussions Q&A](https://github.com/choigawoon/rulesctl/discussions/categories/q-a)
 - 📝 사용 경험 공유: [GitHub Discussions Show and tell](https://github.com/choigawoon/rulesctl/discussions/categories/show-and-tell) 
+
+> **Note**: 버그를 발견하셨거나 새로운 기능을 제안하고 싶으시다면, 언제든지 바로 [GitHub Issues](https://github.com/choigawoon/rulesctl/issues)에 등록해주세요. 여러분의 적극적인 피드백이 프로젝트 발전에 큰 도움이 됩니다! 
