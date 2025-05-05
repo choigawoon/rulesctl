@@ -220,7 +220,18 @@ This document breaks down each task phase to be completable within **1 hour**. T
    - [ ] Test installation process
    - [ ] Update DEPLOY.md documentation
 
-2. Remaining Tasks
+2. Public Rules Store Implementation
+   - [x] Implement `store` subcommand structure
+   - [x] Create `public-store.json` with metadata (name, description, gistid, source, category)
+   - [x] Implement `store list` command to fetch and display templates with full Gist ID
+   - [x] Implement `store download` command to download rules by name
+   - [x] Update documentation for new store commands
+   - [x] Add redirects from deprecated `list --store` to new commands
+   - [x] Set up GitHub Actions workflow for community contribution (auto-merge on thumbs up)
+   - [ ] Add filtering by category
+   - [ ] Add search functionality
+
+3. Remaining Tasks
    - [ ] Improve error handling and logging
    - [ ] Enhance progress display
    - [ ] Improve usage and help documentation
