@@ -258,14 +258,9 @@ Here are the features planned for future releases:
 ```json
 [
   {
-    "name": "remix",
-    "description": "Remix 프로젝트용 베스트 프랙티스 룰셋",
-    "gist_id": "abc123..."
-  },
-  {
-    "name": "fastapi",
-    "description": "FastAPI 백엔드 개발용 룰셋",
-    "gist_id": "def456..."
+    "name": "public",
+    "description": "public ruleset sample",
+    "gist_id": "74abf627d19e4114ac51bf0b6fbec99d"
   }
 ]
 ```
@@ -276,14 +271,20 @@ Here are the features planned for future releases:
 - 일정 수 이상의 👍이 모이면 관리자가 머지하거나, GitHub Actions로 자동 머지할 수 있습니다.
 - 투명한 기록, 토론, 변경 이력 추적이 가능합니다.
 
-#### 템플릿 활용 방법
+#### 템플릿 활용 방법 및 최신성 동기화
 
-- `rulesctl list --template` 명령어로 템플릿 목록을 조회할 수 있도록 기능을 추가할 예정입니다.
-- 원하는 템플릿의 `gist_id`를 복사하여, 기존 명령어(`rulesctl download --gistid <gist_id>`)로 바로 내려받을 수 있습니다.
+- `rulesctl list --template` 명령어를 실행하면, 항상 GitHub의 최신 `public-templates.json` 파일을 자동으로 내려받아 로컬 파일과 해시를 비교합니다.
+  - 최신이 아니면 자동으로 갱신, 최신이면 다운로드를 생략합니다.
+  - 네트워크 오류 시에는 기존 로컬 파일을 사용하며, 파일이 없으면 에러 메시지를 출력합니다.
+- 최신 템플릿 목록을 표로 출력하며, 각 템플릿의 `gist_id`를 복사해 기존 명령어(`rulesctl download --gistid <gist_id>`)로 바로 내려받을 수 있습니다.
 - 예시:
 
 ```bash
-rulesctl download --gistid abc123
+rulesctl list --template
+# 최신 템플릿 목록을 표로 출력
+
+rulesctl download --gistid 74abf627d19e4114ac51bf0b6fbec99d
+# 원하는 템플릿을 바로 내려받기
 ```
 
 - 추후에는 `rulesctl download --template <name>` 명령어에서 내부적으로 json에서 gist_id를 찾아 자동으로 다운로드하도록 확장할 계획입니다.

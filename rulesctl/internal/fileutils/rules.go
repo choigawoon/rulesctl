@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,4 +144,30 @@ func DeleteRuleFile(relativePath string) error {
 	}
 
 	return nil
+}
+
+// HTTP URL에서 파일 다운로드
+func DownloadFileFromURL(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to download file: %s", resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// 바이트 배열의 MD5 해시 계산
+func CalculateMD5FromBytes(data []byte) string {
+	hash := md5.New()
+	hash.Write(data)
+	return hex.EncodeToString(hash.Sum(nil))
 } 
