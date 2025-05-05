@@ -2,7 +2,7 @@
     "name": "rulesctl",
     "author": "choigawoon",
     "description": "rulesctl is a tool to manage rules for the rules engine.",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "bin": {
       "rulesctl": "./rulesctl.js"
     },
