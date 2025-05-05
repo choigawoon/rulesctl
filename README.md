@@ -249,6 +249,46 @@ Here are the features planned for future releases:
   - Establish template quality management standards
 - [ ] Expand multilingual documentation support
 
+### Template Rule Set Collaboration Plan
+
+#### 템플릿 목록 관리 및 활용 방식 (공개 Gist 기반)
+
+- 템플릿 목록은 GitHub 저장소 내 `public-templates.json` 파일로 관리하며, 아래와 같은 구조를 가집니다:
+
+```json
+[
+  {
+    "name": "remix",
+    "description": "Remix 프로젝트용 베스트 프랙티스 룰셋",
+    "gist_id": "abc123..."
+  },
+  {
+    "name": "fastapi",
+    "description": "FastAPI 백엔드 개발용 룰셋",
+    "gist_id": "def456..."
+  }
+]
+```
+
+- 각 템플릿은 **제목(name), 설명(description), gist_id**만 기록합니다.
+- 누구나 Pull Request(PR)로 템플릿을 추가/수정할 수 있습니다.
+- PR이 올라오면, 커뮤니티가 👍(thumbs up) 이모지로 투표할 수 있습니다.
+- 일정 수 이상의 👍이 모이면 관리자가 머지하거나, GitHub Actions로 자동 머지할 수 있습니다.
+- 투명한 기록, 토론, 변경 이력 추적이 가능합니다.
+
+#### 템플릿 활용 방법
+
+- `rulesctl list --template` 명령어로 템플릿 목록을 조회할 수 있도록 기능을 추가할 예정입니다.
+- 원하는 템플릿의 `gist_id`를 복사하여, 기존 명령어(`rulesctl download --gistid <gist_id>`)로 바로 내려받을 수 있습니다.
+- 예시:
+
+```bash
+rulesctl download --gistid abc123
+```
+
+- 추후에는 `rulesctl download --template <name>` 명령어에서 내부적으로 json에서 gist_id를 찾아 자동으로 다운로드하도록 확장할 계획입니다.
+- 기여 가이드 및 품질 관리 기준을 문서화하여, 누구나 쉽게 참여할 수 있도록 할 예정입니다.
+
 You can check progress and request new features through [GitHub Issues](https://github.com/choigawoon/rulesctl/issues).
 
 We need your feedback to make a better tool:
