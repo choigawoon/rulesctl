@@ -37,7 +37,7 @@ git push origin vx.y.z
 
 3. goreleaser로 릴리즈 생성:
 ```bash
-goreleaser release --clean
+~/go/bin/goreleaser release --clean
 ```
 
 4. GitHub에서 릴리즈 확인 및 Publish
