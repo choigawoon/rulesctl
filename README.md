@@ -81,7 +81,7 @@ rulesctl init --sample  # Also create example rule files
 rulesctl download --gistid 74abf627d19e4114ac51bf0b6fbec99d
 
 # View rule list (only shows those from the last month)
-rulesctl list                # Show public/private status and basic info
+rulesctl list                # Show basic information
 rulesctl list --detail      # Show detailed information including revision
 
 # Upload rules
@@ -91,6 +91,10 @@ rulesctl upload "RuleSetName" --public  # Upload as public (can be shared)
 # Download rules
 rulesctl download "RuleSetName"         # Search by title in my Gist
 rulesctl download --gistid abc123       # Download by public Gist ID (no token required)
+
+# Public Rules Store
+rulesctl store list                     # Show available rules from public store
+rulesctl store download "fastapi-patrickjs"  # Download rule by name from store
 ```
 
 ### Sharing Rules 📢
@@ -253,19 +257,21 @@ Here are the features planned for future releases:
 
 #### 템플릿 목록 관리 및 활용 방식 (공개 Gist 기반)
 
-- 템플릿 목록은 GitHub 저장소 내 `public-templates.json` 파일로 관리하며, 아래와 같은 구조를 가집니다:
+- 템플릿 목록은 GitHub 저장소 내 `public-store.json` 파일로 관리하며, 아래와 같은 구조를 가집니다:
 
 ```json
 [
   {
-    "name": "public",
-    "description": "public ruleset sample",
-    "gist_id": "74abf627d19e4114ac51bf0b6fbec99d"
+    "name": "fastapi-patrickjs",
+    "description": "Backend: fastapi cursor rules",
+    "gist_id": "80caa662127c85d73823bd01cfd0e134",
+    "source": "https://github.com/PatrickJS/awesome-cursorrules/blob/main/rules-new/fastapi.mdc",
+    "category": "backend"
   }
 ]
 ```
 
-- 각 템플릿은 **제목(name), 설명(description), gist_id**만 기록합니다.
+- 각 템플릿은 **제목(name), 설명(description), gist_id, 출처(source), 카테고리(category)**를 기록합니다.
 - 누구나 Pull Request(PR)로 템플릿을 추가/수정할 수 있습니다.
 - PR이 올라오면, 커뮤니티가 👍(thumbs up) 이모지로 투표할 수 있습니다.
 - 일정 수 이상의 👍이 모이면 관리자가 머지하거나, GitHub Actions로 자동 머지할 수 있습니다.
@@ -273,22 +279,25 @@ Here are the features planned for future releases:
 
 #### 템플릿 활용 방법 및 최신성 동기화
 
-- `rulesctl list --template` 명령어를 실행하면, 항상 GitHub의 최신 `public-templates.json` 파일을 자동으로 내려받아 로컬 파일과 해시를 비교합니다.
+- `rulesctl store list` 명령어를 실행하면, 항상 GitHub의 최신 `public-store.json` 파일을 자동으로 내려받아 로컬 파일과 해시를 비교합니다.
   - 최신이 아니면 자동으로 갱신, 최신이면 다운로드를 생략합니다.
   - 네트워크 오류 시에는 기존 로컬 파일을 사용하며, 파일이 없으면 에러 메시지를 출력합니다.
-- 최신 템플릿 목록을 표로 출력하며, 각 템플릿의 `gist_id`를 복사해 기존 명령어(`rulesctl download --gistid <gist_id>`)로 바로 내려받을 수 있습니다.
+- 스토어 목록을 표로 출력하며, 각 항목의 이름, 설명, 카테고리, Gist ID가 표시됩니다.
+- 두 가지 방법으로 다운로드할 수 있습니다:
+  1. 이름으로 다운로드: `rulesctl store download <name>`
+  2. Gist ID로 다운로드: `rulesctl download --gistid <gist_id>`
 - 예시:
 
 ```bash
-rulesctl list --template
-# 최신 템플릿 목록을 표로 출력
+# 스토어 목록 조회
+rulesctl store list
 
-rulesctl download --gistid 74abf627d19e4114ac51bf0b6fbec99d
-# 원하는 템플릿을 바로 내려받기
+# 이름으로 다운로드
+rulesctl store download fastapi-patrickjs
+
+# 또는 Gist ID로 다운로드
+rulesctl download --gistid 80caa662127c85d73823bd01cfd0e134
 ```
-
-- 추후에는 `rulesctl download --template <name>` 명령어에서 내부적으로 json에서 gist_id를 찾아 자동으로 다운로드하도록 확장할 계획입니다.
-- 기여 가이드 및 품질 관리 기준을 문서화하여, 누구나 쉽게 참여할 수 있도록 할 예정입니다.
 
 You can check progress and request new features through [GitHub Issues](https://github.com/choigawoon/rulesctl/issues).
 

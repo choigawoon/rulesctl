@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -12,7 +10,6 @@ import (
 
 	"github.com/choigawoon/rulesctl/internal/gist"
 	"github.com/choigawoon/rulesctl/pkg/config"
-	"github.com/choigawoon/rulesctl/internal/fileutils"
 	"github.com/spf13/cobra"
 )
 
@@ -71,56 +68,9 @@ Examples:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		storeMode, _ := cmd.Flags().GetBool("store")
 		if storeMode {
-			// 1. GitHub에서 public-store.json 다운로드
-			const remoteURL = "https://raw.githubusercontent.com/choigawoon/rulesctl/main/public-store.json"
-			jsonPath := filepath.Join("public-store.json")
-
-			remoteData, err := fileutils.DownloadFileFromURL(remoteURL)
-			if err != nil {
-				fmt.Printf("[경고] 원격 스토어 목록을 내려받지 못했습니다: %v\n", err)
-			}
-
-			// 2. 로컬 파일과 해시 비교
-			localData, readErr := os.ReadFile(jsonPath)
-			updateNeeded := false
-			if err == nil && readErr == nil {
-				remoteHash := fileutils.CalculateMD5FromBytes(remoteData)
-				localHash := fileutils.CalculateMD5FromBytes(localData)
-				if remoteHash != localHash {
-					updateNeeded = true
-				}
-			} else if err == nil && readErr != nil {
-				// 로컬 파일이 없으면 무조건 갱신
-				updateNeeded = true
-			}
-
-			if err == nil && updateNeeded {
-				err := os.WriteFile(jsonPath, remoteData, 0644)
-				if err != nil {
-					fmt.Printf("[경고] 최신 스토어 목록을 저장하지 못했습니다: %v\n", err)
-				}
-			}
-
-			// 3. (최신) 로컬 파일 읽어서 출력
-			file, err := os.Open(jsonPath)
-			if err != nil {
-				return fmt.Errorf("public-store.json 파일을 열 수 없습니다: %w", err)
-			}
-			defer file.Close()
-
-			var templates []Template
-			decoder := json.NewDecoder(file)
-			if err := decoder.Decode(&templates); err != nil {
-				return fmt.Errorf("public-store.json 파싱 오류: %w", err)
-			}
-
-			if len(templates) == 0 {
-				fmt.Println("등록된 스토어 항목이 없습니다.")
-				return nil
-			}
-
-			printTemplateList(templates)
-			return nil
+			// --store 플래그가 있으면 store list 명령어로 리다이렉트
+			fmt.Println("알림: 'list --store'는 곧 'store list'로 대체될 예정입니다. 향후 'store list' 명령어를 사용해 주세요.")
+			return storeListCmd.RunE(storeListCmd, args)
 		}
 
 		config, err := config.LoadConfig()
