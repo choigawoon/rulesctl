@@ -9,6 +9,7 @@ import (
 
 	"github.com/choigawoon/rulesctl/internal/fileutils"
 	"github.com/choigawoon/rulesctl/internal/gist"
+	"github.com/choigawoon/rulesctl/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ Shows name, description, category, and full Gist ID for each rule.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 1. GitHub에서 public-store.json 다운로드
 		const remoteURL = "https://raw.githubusercontent.com/choigawoon/rulesctl/main/public-store.json"
-		jsonPath := filepath.Join("public-store.json")
+		jsonPath := filepath.Join(config.GetConfigDir(), "public-store.json")
 
 		remoteData, err := fileutils.DownloadFileFromURL(remoteURL)
 		if err != nil {
@@ -136,7 +137,7 @@ Example:
 		name := args[0]
 
 		// 1. public-store.json 읽기
-		jsonPath := filepath.Join("public-store.json")
+		jsonPath := filepath.Join(config.GetConfigDir(), "public-store.json")
 		file, err := os.Open(jsonPath)
 		if os.IsNotExist(err) {
 			// 파일이 없으면 원격에서 다운로드 시도
