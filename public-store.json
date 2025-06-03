@@ -26,5 +26,12 @@
     "gist_id": "a8814e1366faf080f9bd54e512130ce5",
     "source": "",
     "category": "frontend"
+  },
+  {
+    "name": "frontend-tanstack-shadcnui"
+    "description": "frontend rules",
+    "gist_id": "a0af6b40e52545d463249853f9d6cff7",
+    "source": "",
+    "category": "frontend"
   }
 ] 
