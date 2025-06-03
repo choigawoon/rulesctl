@@ -19,5 +19,12 @@
     "gist_id": "ceac9d7748ab586c2acd6922382512d5",
     "source": "",
     "category": "devops"
+  },
+  {
+    "name": "tanstack-router",
+    "description": "file based tanstack router description",
+    "gist_id": "a8814e1366faf080f9bd54e512130ce5",
+    "source": "",
+    "category": "frontend"
   }
 ] 
